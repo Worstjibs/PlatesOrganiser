@@ -1,0 +1,15 @@
+version: '3.4'
+
+services:
+  platesorganiser.api:
+    image: ${DOCKER_REGISTRY-}platesorganiserapi
+    build:
+      context: .
+      dockerfile: PlatesOrganiser.API/Dockerfile
+
+  platesorganiser.auth:
+    image: ${DOCKER_REGISTRY-}platesorganiserauth
+    build:
+      context: .
+      dockerfile: PlatesOrganiser.Auth/Dockerfile
+

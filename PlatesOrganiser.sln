@@ -1,0 +1,52 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.33711.374
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{4BDA1F8E-BE8F-43D6-B64F-90FACFE550E3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4723FB76-1A59-4F7A-A8F8-0303C6AD8F3F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1F6B1214-A7B8-46B2-A62D-5474A45233BF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlatesOrganiser.API", "src\PlatesOrganiser.API\PlatesOrganiser.API.csproj", "{C4F13146-E3CE-42DE-A60E-20D83DA194F6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlatesOrganiser.Auth", "src\PlatesOrganiser.Auth\PlatesOrganiser.Auth.csproj", "{086EC8ED-FD58-4990-97B7-ED2B4F035E53}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlatesOrganiser.API.Integration.Tests", "tests\PlatesOrganiser.API.Integration.Tests\PlatesOrganiser.API.Integration.Tests.csproj", "{815DF096-1518-455E-936B-87B2EAAE5D25}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4BDA1F8E-BE8F-43D6-B64F-90FACFE550E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BDA1F8E-BE8F-43D6-B64F-90FACFE550E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4BDA1F8E-BE8F-43D6-B64F-90FACFE550E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BDA1F8E-BE8F-43D6-B64F-90FACFE550E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4F13146-E3CE-42DE-A60E-20D83DA194F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4F13146-E3CE-42DE-A60E-20D83DA194F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4F13146-E3CE-42DE-A60E-20D83DA194F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4F13146-E3CE-42DE-A60E-20D83DA194F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{086EC8ED-FD58-4990-97B7-ED2B4F035E53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{086EC8ED-FD58-4990-97B7-ED2B4F035E53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{086EC8ED-FD58-4990-97B7-ED2B4F035E53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{086EC8ED-FD58-4990-97B7-ED2B4F035E53}.Release|Any CPU.Build.0 = Release|Any CPU
+		{815DF096-1518-455E-936B-87B2EAAE5D25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{815DF096-1518-455E-936B-87B2EAAE5D25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{815DF096-1518-455E-936B-87B2EAAE5D25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{815DF096-1518-455E-936B-87B2EAAE5D25}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C4F13146-E3CE-42DE-A60E-20D83DA194F6} = {4723FB76-1A59-4F7A-A8F8-0303C6AD8F3F}
+		{086EC8ED-FD58-4990-97B7-ED2B4F035E53} = {4723FB76-1A59-4F7A-A8F8-0303C6AD8F3F}
+		{815DF096-1518-455E-936B-87B2EAAE5D25} = {1F6B1214-A7B8-46B2-A62D-5474A45233BF}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {55E4A7E4-B6F1-4AA2-A009-740C5E9DAA7C}
+	EndGlobalSection
+EndGlobal
