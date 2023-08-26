@@ -1,0 +1,7 @@
+﻿namespace PlatesOrganiser.API.Services;
+
+public interface IRecordQueryingService
+{
+    public Task<RecordQueryResponse?> GetMasterReleaseById(int id);
+    public Task<RecordQueryResponse?> GetMasterRelease(string title, string? artist);
+}

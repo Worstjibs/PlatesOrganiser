@@ -2,14 +2,35 @@ version: '3.4'
 
 services:
   platesorganiser.api:
+    container_name: platesorganiser.api
     image: ${DOCKER_REGISTRY-}platesorganiserapi
     build:
       context: .
-      dockerfile: PlatesOrganiser.API/Dockerfile
+      dockerfile: src/PlatesOrganiser.API/Dockerfile
+    networks:
+      - plates-network
 
-  platesorganiser.auth:
-    image: ${DOCKER_REGISTRY-}platesorganiserauth
-    build:
-      context: .
-      dockerfile: PlatesOrganiser.Auth/Dockerfile
+  # platesorganiser.auth:
+  #   container_name: platesorganiser.auth
+  #   image: ${DOCKER_REGISTRY-}platesorganiserauth
+  #   build:
+  #     context: .
+  #     dockerfile: src/PlatesOrganiser.Auth/Dockerfile
+  #   networks:
+  #     - plates-network
 
+  postgres:
+    container_name: postgres
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - plates-network
+
+networks:
+  plates-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

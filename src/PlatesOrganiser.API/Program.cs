@@ -1,3 +1,12 @@
+using Microsoft.EntityFrameworkCore;
+using PlatesOrganiser.API.Seed;
+using PlatesOrganiser.API.Services.CurrentUser;
+using PlatesOrganiser.Application;
+using PlatesOrganiser.Application.Services.CurrentUser;
+using PlatesOrganiser.Infrastructure;
+using PlatesOrganiser.Infrastructure.Context;
+using PlatesOrganiser.Infrastructure.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -7,7 +16,23 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services
+    .AddApplicationServices()
+    .AddInfrastructureServices(builder.Configuration);
+
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+var clientConfig = builder.Configuration.GetSection("DiscogsClient").Get<ClientConfig>();
+
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<PlatesContext>();
+    await context.Database.MigrateAsync();
+
+    await Seeder.SeedDatabaseAsync(context);
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

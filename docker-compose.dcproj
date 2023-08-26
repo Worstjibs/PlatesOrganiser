@@ -5,8 +5,8 @@
     <DockerTargetOS>Linux</DockerTargetOS>
     <ProjectGuid>4bda1f8e-be8f-43d6-b64f-90facfe550e3</ProjectGuid>
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
-    <DockerServiceUrl>{Scheme}://localhost:{ServicePort}</DockerServiceUrl>
-    <DockerServiceName>platesorganiser.auth</DockerServiceName>
+    <DockerServiceUrl>{Scheme}://localhost:{ServicePort}/swagger</DockerServiceUrl>
+    <DockerServiceName>platesorganiser.api</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>
     <None Include="docker-compose.override.yml">

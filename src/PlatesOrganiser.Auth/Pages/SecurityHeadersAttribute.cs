@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 namespace PlatesOrganiser.Auth.Pages;
 public class SecurityHeadersAttribute : ActionFilterAttribute
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "ASP0019:Suggest using IHeaderDictionary.Append or the indexer", Justification = "<Pending>")]
     public override void OnResultExecuting(ResultExecutingContext context)
     {
         var result = context.Result;

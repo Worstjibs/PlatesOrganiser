@@ -5,20 +5,30 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=https://+:443;http://+:80
-    ports:
-      - "80"
-      - "443"
-    volumes:
-      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
-
-  platesorganiser.auth:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ConnectionStrings__DefaultConnection=Server=postgres;Port=5432;Database=plates_db;User Id=plates_user;Password=plates_password;
     ports:
       - "5000:80"
       - "5001:443"
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+
+  # platesorganiser.auth:
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Development
+  #     - ASPNETCORE_URLS=https://+:443;http://+:80
+  #     - ConnectionStrings__DefaultConnection=Server=postgres;Port=5432;Database=plates_db;User Id=plates_user;Password=plates_password;"
+  #   ports:
+  #     - "5100:80"
+  #     - "5101:443"
+  #   volumes:
+  #     - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+  #     - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+
+  postgres:
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=plates_password
+      - POSTGRES_USER=plates_user
+      - POSTGRES_DB=plates_db
