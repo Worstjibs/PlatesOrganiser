@@ -19,12 +19,13 @@ public class RecordQueryingService : IRecordQueryingService
         return masterRelease;
     }
 
-    public async Task<RecordQueryResponse?> GetMasterRelease(string title, string? artist)
+    public async Task<RecordQueryResponse?> GetMasterRelease(string title, string? artist, string? label)
     {
         var searchResult = await _discogsClient.SearchAsync(new SearchCriteria
         {
             Title = title,
-            Artist = artist
+            Artist = artist,
+            Label = label
         });
 
         var masterReleases = searchResult.Results
@@ -38,57 +39,42 @@ public class RecordQueryingService : IRecordQueryingService
         if (masterId is null)
             return null;
 
-        var masterRelease = await _discogsClient.GetMasterReleaseAsync(masterId.Value);
-
-        var allVersions = await _discogsClient.GetAllVersionsAsync(new VersionsCriteria(masterRelease.MasterId));
-
-        var labels = allVersions.Versions
-                                    .Select(x => x.Label)
-                                    .GroupBy(x => x, x => x, (g, k) => new { Count = k.Count(), Name = g })
-                                    .OrderByDescending(x => x.Count)
-                                    .ToList();
-
-        var primaryLabel = labels.FirstOrDefault()?.Name;
-
-        var response = new RecordQueryResponse(
-            masterId.Value,
-            masterRelease.Title)
-        {
-            Year = (ushort)masterRelease.Year,
-            PrimaryLabel = primaryLabel,
-            OtherLabels = labels.Select(x => x.Name).Distinct().ToList(),
-            Artists = masterRelease.Artists.Select(x => x.Name).ToList()
-        };
-
-        return response;
+        return await GetMasterReleaseInternal(masterId.Value);
     }
 
     private async Task<RecordQueryResponse?> GetMasterReleaseInternal(int masterReleaseId)
     {
-        var masterRelease = await _discogsClient.GetMasterReleaseAsync(masterReleaseId);
-        if (masterRelease is null)
-            return null;
-
-        var allVersions = await _discogsClient.GetAllVersionsAsync(new VersionsCriteria(masterRelease.MasterId));
-
-        var labels = allVersions.Versions
-                                    .Select(x => x.Label)
-                                    .GroupBy(x => x, x => x, (g, k) => new { Count = k.Count(), Name = g })
-                                    .OrderByDescending(x => x.Count)
-                                    .ToList();
-
-        var primaryLabel = labels.FirstOrDefault()?.Name;
-
-        var response = new RecordQueryResponse(
-            masterReleaseId,
-            masterRelease.Title)
+        try
         {
-            Year = (ushort)masterRelease.Year,
-            PrimaryLabel = primaryLabel,
-            OtherLabels = labels.Select(x => x.Name).Distinct().ToList(),
-            Artists = masterRelease.Artists.Select(x => x.Name).ToList()
-        };
+            var masterRelease = await _discogsClient.GetMasterReleaseAsync(masterReleaseId);
+            if (masterRelease is null)
+                return null;
 
-        return response;
+            var allVersions = await _discogsClient.GetAllVersionsAsync(new VersionsCriteria(masterRelease.MasterId));
+
+            var labels = allVersions.Versions
+                                        .Select(x => x.Label)
+                                        .GroupBy(x => x, x => x, (g, k) => new { Count = k.Count(), Name = g })
+                                        .OrderByDescending(x => x.Count)
+                                        .ToList();
+
+            var primaryLabel = labels.FirstOrDefault()?.Name;
+
+            var response = new RecordQueryResponse(
+                masterReleaseId,
+                masterRelease.Title)
+            {
+                Year = (ushort)masterRelease.Year,
+                PrimaryLabel = primaryLabel,
+                OtherLabels = labels.Select(x => x.Name).Distinct().ToList(),
+                Artists = masterRelease.Artists.Select(x => x.Name).ToList()
+            };
+
+            return response;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
     }
 }

@@ -2,11 +2,11 @@
 using PlatesOrganiser.API.Services;
 using PlatesOrganiser.Domain.Entities;
 using PlatesOrganiser.Domain.Repositories;
-using System.Reflection.Metadata.Ecma335;
+using PlatesOrganiser.Domain.Shared;
 
 namespace PlatesOrganiser.Application.Features.Plates.Commands.AddPlate;
 
-internal class AddPlateHandler : IRequestHandler<AddPlateCommand, PlateDto>
+internal class AddPlateHandler : IRequestHandler<AddPlateCommand, Result<PlateDto>>
 {
     private readonly IRecordQueryingService _queryingService;
     private readonly ILabelRepository _labelRepository;
@@ -26,15 +26,15 @@ internal class AddPlateHandler : IRequestHandler<AddPlateCommand, PlateDto>
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<PlateDto> Handle(AddPlateCommand request, CancellationToken cancellationToken)
+    public async Task<Result<PlateDto>> Handle(AddPlateCommand request, CancellationToken cancellationToken)
     {
         var plate = await _plateRepository.GetPlateByMasterReleaseId(request.MasterReleaseId);
         if (plate is not null)
-            return MapToDto(plate);
+            return Result.Failure<PlateDto>(Error.Bad);
 
         var masterRelease = await _queryingService.GetMasterReleaseById(request.MasterReleaseId);
         if (masterRelease is null)
-            return null;
+            return Result.Failure<PlateDto>(Error.NotFound);
 
         var label = await GetOrCreateLabel(masterRelease.PrimaryLabel!);
 
@@ -50,7 +50,7 @@ internal class AddPlateHandler : IRequestHandler<AddPlateCommand, PlateDto>
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return MapToDto(plate);
+        return Result.Create(MapToDto(plate));
     }
 
     private PlateDto MapToDto(Plate plate)

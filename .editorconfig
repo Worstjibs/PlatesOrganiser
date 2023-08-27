@@ -57,6 +57,7 @@ dotnet_naming_style._fieldname.word_separator =
 dotnet_naming_style._fieldname.capitalization = camel_case
 csharp_style_prefer_primary_constructors = true:suggestion
 csharp_style_throw_expression = true:suggestion
+csharp_new_line_before_catch = true
 
 [*.{cs,vb}]
 #### Naming styles ####

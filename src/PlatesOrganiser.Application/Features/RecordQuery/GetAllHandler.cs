@@ -14,7 +14,7 @@ internal class GetAllHandler : IRequestHandler<GetAllQuery, IEnumerable<RecordQu
 
     public async Task<IEnumerable<RecordQueryResponse>> Handle(GetAllQuery request, CancellationToken cancellationToken)
     {
-        var response = await _discogsService.GetMasterRelease(request.Title, request.Artist);
+        var response = await _discogsService.GetMasterRelease(request.Title, request.Artist, request.Label);
 
         if (response == null)
             return Enumerable.Empty<RecordQueryResponse>();

@@ -14,11 +14,6 @@ public class PlateRepository : IPlateRepository
         _context = context;
     }
 
-    public void AddPlate(Plate plate)
-    {
-        _context.Plates.Add(plate);
-    }
-
     public async Task<Plate?> GetPlateById(Guid id)
     {
         return await _context.Plates
@@ -31,5 +26,17 @@ public class PlateRepository : IPlateRepository
         return await _context.Plates
                                 .Include(x => x.PrimaryLabel)
                                 .FirstOrDefaultAsync(x => x.DiscogsMasterReleaseId == id);
+    }
+
+    public async Task<IEnumerable<Plate>> GetAllPlates()
+    {
+        return await _context.Plates
+                                .Include(x => x.PrimaryLabel)
+                                .ToListAsync();
+    }
+
+    public void AddPlate(Plate plate)
+    {
+        _context.Plates.Add(plate);
     }
 }
