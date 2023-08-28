@@ -1,15 +1,17 @@
 ﻿using ParkSquare.Discogs;
-using PlatesOrganiser.API.Services;
+using PlatesOrganiser.API.RecordQuerying.Services;
 
 namespace PlatesOrganiser.Infrastructure.Services;
 
 public class RecordQueryingService : IRecordQueryingService
 {
     private readonly IDiscogsClient _discogsClient;
+    private readonly IClientConfig _clientConfig;
 
-    public RecordQueryingService(IDiscogsClient discogsClient)
+    public RecordQueryingService(IDiscogsClient discogsClient, IClientConfig clientConfig)
     {
         _discogsClient = discogsClient;
+        _clientConfig = clientConfig;
     }
 
     public async Task<RecordQueryResponse?> GetMasterReleaseById(int id)
@@ -72,7 +74,7 @@ public class RecordQueryingService : IRecordQueryingService
 
             return response;
         }
-        catch (Exception)
+        catch (HttpRequestException ex)
         {
             return null;
         }

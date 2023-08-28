@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using PlatesOrganiser.API.Services;
+using PlatesOrganiser.API.RecordQuerying.Services;
 using PlatesOrganiser.Domain.Entities;
 using PlatesOrganiser.Domain.Repositories;
 using PlatesOrganiser.Domain.Shared;

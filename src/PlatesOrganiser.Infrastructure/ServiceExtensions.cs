@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using ParkSquare.Discogs;
-using PlatesOrganiser.API.Services;
+using PlatesOrganiser.API.RecordQuerying.Services;
 using PlatesOrganiser.Domain.Repositories;
 using PlatesOrganiser.Infrastructure.Context;
 using PlatesOrganiser.Infrastructure.Repositories;
@@ -20,7 +20,9 @@ public static class ServiceExtensions
 
         services
             .AddSingleton<IApiQueryBuilder, ApiQueryBuilder>()
-            .AddSingleton<IClientConfig, ClientConfig>(s => s.GetRequiredService<IOptions<ClientConfig>>().Value)
+            .AddSingleton<IClientConfig, ClientConfig>(s => s.GetRequiredService<IOptions<ClientConfig>>().Value);
+
+        services
             .AddHttpClient<IDiscogsClient, DiscogsClient>()
                 .ConfigurePrimaryHttpMessageHandler(_ =>
                     new HttpClientHandler

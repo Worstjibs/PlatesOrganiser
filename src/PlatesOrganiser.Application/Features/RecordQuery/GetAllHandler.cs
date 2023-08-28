@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using PlatesOrganiser.API.Services;
+using PlatesOrganiser.API.RecordQuerying.Services;
 
 namespace PlatesOrganiser.Application.Features.Discogs;
 

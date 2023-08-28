@@ -17,8 +17,4 @@
     <ProjectReference Include="..\PlatesOrganiser.Domain\PlatesOrganiser.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Services\RecordQuerying\" />
-  </ItemGroup>
-
 </Project>

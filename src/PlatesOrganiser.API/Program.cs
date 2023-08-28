@@ -30,8 +30,6 @@ builder.Services
 
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
-var clientConfig = builder.Configuration.GetSection("DiscogsClient").Get<ClientConfig>();
-
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())

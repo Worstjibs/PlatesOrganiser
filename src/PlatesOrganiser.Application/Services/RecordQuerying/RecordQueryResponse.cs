@@ -1,4 +1,4 @@
-﻿namespace PlatesOrganiser.API.Services;
+﻿namespace PlatesOrganiser.API.RecordQuerying.Services;
 
 public class RecordQueryResponse
 {

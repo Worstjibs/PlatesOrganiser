@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using PlatesOrganiser.API.Services;
+using PlatesOrganiser.API.RecordQuerying.Services;
 
 namespace PlatesOrganiser.API.Controllers;
 
