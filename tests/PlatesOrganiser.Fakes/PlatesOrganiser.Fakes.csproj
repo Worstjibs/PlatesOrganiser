@@ -8,10 +8,11 @@
 
 	<ItemGroup>
 		<PackageReference Include="Bogus" Version="34.0.2" />
+		<PackageReference Include="ParkSquare.Discogs" Version="1.0.34" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\src\PlatesOrganiser.API\PlatesOrganiser.API.csproj" />
+	  <ProjectReference Include="..\..\src\PlatesOrganiser.Domain\PlatesOrganiser.Domain.csproj" />
 	</ItemGroup>
 
 </Project>

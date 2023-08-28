@@ -2,6 +2,6 @@
 
 public interface IRecordQueryingService
 {
-    public Task<RecordQueryResponse?> GetMasterReleaseById(int id);
-    public Task<RecordQueryResponse?> GetMasterRelease(string title, string? artist = null, string? label = null);
+    public Task<RecordQueryResponse?> GetMasterReleaseByIdAsync(int masterReleaseId);
+    public Task<RecordQueryResponse?> GetReleaseAsync(string title, string? artist = null, string? label = null);
 }

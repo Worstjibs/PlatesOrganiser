@@ -4,27 +4,18 @@ using PlatesOrganiser.Application.Features.Plates;
 using PlatesOrganiser.Application.Features.Plates.Commands.AddPlate;
 using PlatesOrganiser.Domain.Entities;
 using PlatesOrganiser.Domain.Repositories;
+using PlatesOrganiser.Fakes;
 using System.Net;
 using System.Net.Http.Json;
-using WireMock.Client;
 using WireMock.Client.Extensions;
+using Discogs = ParkSquare.Discogs.Dto;
 
 namespace PlatesOrganiser.API.Integration.Tests.Controllers;
 
-[Collection("Shared collection")]
-public class PlatesControllerTests
+public class PlatesControllerTests : IntegrationTestBase
 {
-    private readonly Random _random = new Random(808);
-
-    private readonly WebApiFactory _factory;
-    private readonly IWireMockAdminApi _wireMock;
-    private readonly HttpClient _client;
-
-    public PlatesControllerTests(WebApiFactory factory)
+    public PlatesControllerTests(WebApiFactory factory) : base(factory)
     {
-        _factory = factory;
-        _wireMock = factory.WireMockApi;
-        _client = factory.HttpClient;
     }
 
     [Fact]
@@ -33,7 +24,8 @@ public class PlatesControllerTests
         // Arrange
         var command = new AddPlateCommand(_random.Next(10000));
 
-        await SetupDiscogs(command.MasterReleaseId);
+        var masterRelease = await SetupMasterReleaseRequest(command.MasterReleaseId);
+        await SetupMasterReleaseVersionsRequest(10, command.MasterReleaseId);
 
         // Act
         var response = await _client.PostAsJsonAsync("api/plates", command);
@@ -44,13 +36,15 @@ public class PlatesControllerTests
         var item = await response.Content.ReadFromJsonAsync<PlateDto>();
 
         item.Should().NotBeNull();
+        item!.Name.Should().Be(masterRelease.Title);
+        item.DiscogsMasterReleaseId.Should().Be(command.MasterReleaseId);
 
         var dbEntity = await GetPlateById(item!.Id);
 
         dbEntity.Should().BeEquivalentTo(item);
     }
 
-    private async Task SetupDiscogs(int masterReleaseId)
+    private async Task<MasterRelease> SetupMasterReleaseRequest(int masterReleaseId)
     {
         var builder = _wireMock.GetMappingBuilder();
 
@@ -64,6 +58,34 @@ public class PlatesControllerTests
                         .WithBodyAsJson(masterRelease)));
 
         await builder.BuildAndPostAsync();
+
+        return masterRelease;
+    }
+
+    private async Task<IEnumerable<Discogs.Version>> SetupMasterReleaseVersionsRequest(int count, int masterReleaseId)
+    {
+        var versions = Fake.Versions(count).ToList();
+        var versionResults = new VersionResults
+        {
+            Pagination = new Pagination
+            {
+                Pages = 1
+            },
+            Versions = versions
+        };
+
+        var builder = _wireMock.GetMappingBuilder();
+
+        builder.Given(m => m
+                   .WithRequest(req => req
+                        .UsingGet()
+                        .WithPath($"/masters/{masterReleaseId}/versions"))
+                   .WithResponse(rsp => rsp
+                        .WithBodyAsJson(versionResults)));
+
+        await builder.BuildAndPostAsync();
+
+        return versions;
     }
 
     private async Task<Plate?> GetPlateById(Guid id)

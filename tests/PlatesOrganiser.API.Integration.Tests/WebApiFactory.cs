@@ -4,18 +4,12 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
-using Org.BouncyCastle.Ocsp;
 using ParkSquare.Discogs;
-using ParkSquare.Discogs.Dto;
 using PlatesOrganiser.Infrastructure.Context;
 using PlatesOrganiser.Infrastructure.Services;
-using System.Security.Cryptography;
 using Testcontainers.PostgreSql;
 using WireMock.Client;
-using WireMock.Client.Extensions;
 using WireMock.Net.Testcontainers;
-using WireMock.Server;
 
 namespace PlatesOrganiser.API.Integration.Tests;
 
@@ -56,7 +50,7 @@ public class WebApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLifetime
     }
 
     public HttpClient HttpClient { get; private set; } = default!;
-    public IWireMockAdminApi WireMockApi { get; set; }
+    public IWireMockAdminApi WireMockApi { get; private set; } = default!;
 
     public async Task InitializeAsync()
     {
@@ -68,5 +62,10 @@ public class WebApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLifetime
 
         HttpClient = CreateClient();
     }
-    Task IAsyncLifetime.DisposeAsync() => Task.CompletedTask;
+
+    async Task IAsyncLifetime.DisposeAsync()
+    {
+        await _dbContainer.StopAsync();
+        await _mockServer.StopAsync();
+    }
 }

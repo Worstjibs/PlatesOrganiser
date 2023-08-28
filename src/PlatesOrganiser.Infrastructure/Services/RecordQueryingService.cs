@@ -1,27 +1,26 @@
 ﻿using ParkSquare.Discogs;
 using PlatesOrganiser.API.RecordQuerying.Services;
+using System.Net;
 
 namespace PlatesOrganiser.Infrastructure.Services;
 
 public class RecordQueryingService : IRecordQueryingService
 {
     private readonly IDiscogsClient _discogsClient;
-    private readonly IClientConfig _clientConfig;
 
-    public RecordQueryingService(IDiscogsClient discogsClient, IClientConfig clientConfig)
+    public RecordQueryingService(IDiscogsClient discogsClient)
     {
         _discogsClient = discogsClient;
-        _clientConfig = clientConfig;
     }
 
-    public async Task<RecordQueryResponse?> GetMasterReleaseById(int id)
+    public async Task<RecordQueryResponse?> GetMasterReleaseByIdAsync(int masterReleaseId)
     {
-        var masterRelease = await GetMasterReleaseInternal(id);
+        var masterRelease = await GetMasterReleaseInternal(masterReleaseId);
 
         return masterRelease;
     }
 
-    public async Task<RecordQueryResponse?> GetMasterRelease(string title, string? artist, string? label)
+    public async Task<RecordQueryResponse?> GetReleaseAsync(string title, string? artist, string? label)
     {
         var searchResult = await _discogsClient.SearchAsync(new SearchCriteria
         {
@@ -30,18 +29,36 @@ public class RecordQueryingService : IRecordQueryingService
             Label = label
         });
 
-        var masterReleases = searchResult.Results
-                                    .Where(x => x.MasterId is not null)
-                                    .GroupBy(x => x.MasterId, x => x, (g, k) => new { Count = k.Count(), Id = g })
+        var groupedReleases = searchResult.Results
+                                    .GroupBy(
+                                        s => new { s.Title, s.MasterId },
+                                        s => s,
+                                        (g, k) => new { Key = g, Count = k.Count(), Items = k })
                                     .OrderByDescending(x => x.Count)
                                     .ToList();
 
-
-        var masterId = masterReleases.FirstOrDefault()?.Id;
-        if (masterId is null)
+        var firstGroup = groupedReleases.FirstOrDefault();
+        if (firstGroup is null)
             return null;
 
-        return await GetMasterReleaseInternal(masterId.Value);
+        if (firstGroup.Key.MasterId is not null)
+            return await GetMasterReleaseInternal(firstGroup.Key.MasterId.Value);
+
+        var releaseId = firstGroup.Items.First().ReleaseId;
+        var release = await _discogsClient.GetReleaseAsync(releaseId);
+
+        var labelNames = release.Labels.Select(x => x.Name).Distinct().ToList();
+
+        return new RecordQueryResponse(
+            release.ReleaseId,
+            release.Title,
+            false)
+        {
+            Year = (ushort)release.Year,
+            PrimaryLabel = labelNames.FirstOrDefault(),
+            OtherLabels = labelNames,
+            Artists = release.Artists.Select(x => x.Name).ToList()
+        };
     }
 
     private async Task<RecordQueryResponse?> GetMasterReleaseInternal(int masterReleaseId)
@@ -64,7 +81,8 @@ public class RecordQueryingService : IRecordQueryingService
 
             var response = new RecordQueryResponse(
                 masterReleaseId,
-                masterRelease.Title)
+                masterRelease.Title,
+                true)
             {
                 Year = (ushort)masterRelease.Year,
                 PrimaryLabel = primaryLabel,
@@ -74,7 +92,7 @@ public class RecordQueryingService : IRecordQueryingService
 
             return response;
         }
-        catch (HttpRequestException ex)
+        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
         {
             return null;
         }

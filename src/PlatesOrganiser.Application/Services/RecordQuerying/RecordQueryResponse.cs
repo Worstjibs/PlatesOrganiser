@@ -2,15 +2,15 @@
 
 public class RecordQueryResponse
 {
-    public RecordQueryResponse(int masterReleaseId, string title)
+    public RecordQueryResponse(int releaseId, string title, bool isMasterRelease)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
 
-        MasterReleaseId = masterReleaseId;
+        ReleaseId = releaseId;
         Title = title;
     }
 
-    public int MasterReleaseId { get; set; }
+    public int ReleaseId { get; init; }
     public string Title { get; init; }
     public ushort Year { get; init; }
     public string? PrimaryLabel { get; init; }

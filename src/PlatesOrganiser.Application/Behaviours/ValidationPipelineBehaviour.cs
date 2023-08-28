@@ -43,10 +43,12 @@ internal class ValidationPipelineBehaviour<TRequest, TResponse> : IPipelineBehav
         //                    .MakeGenericType(typeof(TResult).GenericTypeArguments[0])
         //                    .GetMethod("Failure");
 
-        var failureMethod = typeof(Result).GetMethod("Failure").MakeGenericMethod(typeof(TResult).GenericTypeArguments[0]);
-        var arguments = new object[] { Error.Bad };
-        var result = failureMethod.Invoke(null, arguments);
+        var failureMethod = typeof(Result)
+                                    .GetMethod(nameof(Result.Failure))!
+                                    .MakeGenericMethod(typeof(TResult).GenericTypeArguments[0]);
 
-        return result as TResult;
+        var result = failureMethod.Invoke(null, new object[] { Error.Bad });
+
+        return (result as TResult)!;
     }
 }

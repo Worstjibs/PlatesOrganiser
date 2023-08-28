@@ -32,7 +32,7 @@ internal class AddPlateHandler : IRequestHandler<AddPlateCommand, Result<PlateDt
         if (plate is not null)
             return Result.Failure<PlateDto>(Error.Bad);
 
-        var masterRelease = await _queryingService.GetMasterReleaseById(request.MasterReleaseId);
+        var masterRelease = await _queryingService.GetMasterReleaseByIdAsync(request.MasterReleaseId);
         if (masterRelease is null)
             return Result.Failure<PlateDto>(Error.NotFound);
 
@@ -41,7 +41,7 @@ internal class AddPlateHandler : IRequestHandler<AddPlateCommand, Result<PlateDt
         plate = new Plate
         {
             Name = masterRelease.Title,
-            DiscogsMasterReleaseId = masterRelease.MasterReleaseId,
+            DiscogsMasterReleaseId = masterRelease.ReleaseId,
             PrimaryLabelId = label.Id,
             PrimaryLabel = label
         };
