@@ -7,21 +7,26 @@ services:
     build:
       context: .
       dockerfile: src/PlatesOrganiser.API/Dockerfile
+    depends_on:
+      - postgres
     networks:
       - plates-network
 
-  # platesorganiser.auth:
-  #   container_name: platesorganiser.auth
-  #   image: ${DOCKER_REGISTRY-}platesorganiserauth
-  #   build:
-  #     context: .
-  #     dockerfile: src/PlatesOrganiser.Auth/Dockerfile
-  #   networks:
-  #     - plates-network
+  platesorganiser.auth:
+    container_name: platesorganiser.auth
+    image: ${DOCKER_REGISTRY-}platesorganiserauth
+    build:
+      context: .
+      dockerfile: src/PlatesOrganiser.Auth/Dockerfile
+    
+    depends_on:
+      - postgres
+    networks:
+      - plates-network
 
   postgres:
     container_name: postgres
-    image: postgres:15-1
+    image: postgres:15.1
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:

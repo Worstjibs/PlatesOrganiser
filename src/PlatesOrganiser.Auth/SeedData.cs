@@ -9,15 +9,15 @@ using System.Security.Claims;
 namespace PlatesOrganiser.Auth;
 public class SeedData
 {
-    public static void EnsureSeedData(WebApplication app)
+    public static async Task EnsureSeedData(WebApplication app)
     {
-        using (var scope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateScope())
+        using (var scope = app.Services.CreateScope())
         {
             var context = scope.ServiceProvider.GetService<ApplicationDbContext>();
-            context.Database.Migrate();
+            await context.Database.MigrateAsync();
 
             var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            var alice = userMgr.FindByNameAsync("alice").Result;
+            var alice = await userMgr.FindByNameAsync("alice");
             if (alice == null)
             {
                 alice = new ApplicationUser
@@ -26,18 +26,18 @@ public class SeedData
                     Email = "AliceSmith@email.com",
                     EmailConfirmed = true,
                 };
-                var result = userMgr.CreateAsync(alice, "Pass123$").Result;
+                var result = await userMgr.CreateAsync(alice, "Pass123$");
                 if (!result.Succeeded)
                 {
                     throw new Exception(result.Errors.First().Description);
                 }
 
-                result = userMgr.AddClaimsAsync(alice, new Claim[]{
+                result = await userMgr.AddClaimsAsync(alice, new Claim[]{
                             new Claim(JwtClaimTypes.Name, "Alice Smith"),
                             new Claim(JwtClaimTypes.GivenName, "Alice"),
                             new Claim(JwtClaimTypes.FamilyName, "Smith"),
                             new Claim(JwtClaimTypes.WebSite, "http://alice.com"),
-                        }).Result;
+                        });
                 if (!result.Succeeded)
                 {
                     throw new Exception(result.Errors.First().Description);
@@ -48,7 +48,7 @@ public class SeedData
                 Log.Debug("alice already exists");
             }
 
-            var bob = userMgr.FindByNameAsync("bob").Result;
+            var bob = await userMgr.FindByNameAsync("bob");
             if (bob == null)
             {
                 bob = new ApplicationUser
@@ -57,19 +57,19 @@ public class SeedData
                     Email = "BobSmith@email.com",
                     EmailConfirmed = true
                 };
-                var result = userMgr.CreateAsync(bob, "Pass123$").Result;
+                var result = await userMgr.CreateAsync(bob, "Pass123$");
                 if (!result.Succeeded)
                 {
                     throw new Exception(result.Errors.First().Description);
                 }
 
-                result = userMgr.AddClaimsAsync(bob, new Claim[]{
+                result = await userMgr.AddClaimsAsync(bob, new Claim[]{
                             new Claim(JwtClaimTypes.Name, "Bob Smith"),
                             new Claim(JwtClaimTypes.GivenName, "Bob"),
                             new Claim(JwtClaimTypes.FamilyName, "Smith"),
                             new Claim(JwtClaimTypes.WebSite, "http://bob.com"),
                             new Claim("location", "somewhere")
-                        }).Result;
+                        });
                 if (!result.Succeeded)
                 {
                     throw new Exception(result.Errors.First().Description);

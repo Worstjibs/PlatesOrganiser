@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PlatesOrganiser.Auth.Data;
 using PlatesOrganiser.Auth.Models;
+using PlatesOrganiser.Auth.Services;
 using Serilog;
 
 namespace PlatesOrganiser.Auth;
@@ -33,7 +34,8 @@ internal static class HostingExtensions
             .AddInMemoryIdentityResources(Config.IdentityResources)
             .AddInMemoryApiScopes(Config.ApiScopes)
             .AddInMemoryClients(Config.Clients)
-            .AddAspNetIdentity<ApplicationUser>();
+            .AddAspNetIdentity<ApplicationUser>()
+            .AddProfileService<ProfileService>();
 
         builder.Services.AddAuthentication()
             .AddGoogle(options =>

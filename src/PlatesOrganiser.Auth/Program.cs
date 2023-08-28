@@ -1,4 +1,5 @@
-﻿using PlatesOrganiser.Auth;
+﻿using Duende.IdentityServer.Models;
+using PlatesOrganiser.Auth;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -20,15 +21,8 @@ try
         .ConfigureServices()
         .ConfigurePipeline();
 
-    // this seeding is only for the template to bootstrap the DB and users.
-    // in production you will likely want a different approach.
-    if (args.Contains("/seed"))
-    {
-        Log.Information("Seeding database...");
-        SeedData.EnsureSeedData(app);
-        Log.Information("Done seeding database. Exiting.");
-        return;
-    }
+    Log.Information("Seeding database...");
+    await SeedData.EnsureSeedData(app);
 
     app.Run();
 } catch (Exception ex) when (

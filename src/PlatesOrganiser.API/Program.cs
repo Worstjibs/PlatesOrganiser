@@ -1,5 +1,9 @@
+using IdentityModel;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using PlatesOrganiser.API.Seed;
 using PlatesOrganiser.API.Services.CurrentUser;
 using PlatesOrganiser.Application;
@@ -7,6 +11,7 @@ using PlatesOrganiser.Application.Services.CurrentUser;
 using PlatesOrganiser.Infrastructure;
 using PlatesOrganiser.Infrastructure.Context;
 using PlatesOrganiser.Infrastructure.Services;
+using System.Text;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,8 +30,33 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 });
 
 builder.Services
-    .AddApplicationServices()
-    .AddInfrastructureServices(builder.Configuration);
+            .AddApplicationServices()
+            .AddInfrastructureServices(builder.Configuration);
+
+builder.Services
+            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.Authority = "http://platesorganiser.auth";
+                    options.RequireHttpsMetadata = false;
+
+                    options.TokenValidationParameters = new()
+                    {
+                        ValidateIssuer = true,
+                        ValidateIssuerSigningKey = false,
+                        ValidateAudience = false,
+                        ValidateActor = false,
+                        ValidateLifetime = false,
+                        ValidateTokenReplay = false,
+
+                        ValidIssuer = "https://localhost:5101",
+
+                        NameClaimType = JwtClaimTypes.GivenName,
+                        RoleClaimType = JwtClaimTypes.Role
+                    };
+                });
+
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
@@ -49,6 +79,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
