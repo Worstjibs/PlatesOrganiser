@@ -4,9 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using PlatesOrganiser.Auth.Data;
 using PlatesOrganiser.Auth.Models;
 using Serilog;
+using System.Runtime.CompilerServices;
 using System.Security.Claims;
 
 namespace PlatesOrganiser.Auth;
+
 public class SeedData
 {
     public static async Task EnsureSeedData(WebApplication app)
@@ -36,7 +38,9 @@ public class SeedData
                             new Claim(JwtClaimTypes.Name, "Alice Smith"),
                             new Claim(JwtClaimTypes.GivenName, "Alice"),
                             new Claim(JwtClaimTypes.FamilyName, "Smith"),
+                            new Claim(JwtClaimTypes.PreferredUserName, "alice"),
                             new Claim(JwtClaimTypes.WebSite, "http://alice.com"),
+                            new Claim(JwtClaimTypes.Email, "alice.smith@mail.com"),
                         });
                 if (!result.Succeeded)
                 {
@@ -67,7 +71,9 @@ public class SeedData
                             new Claim(JwtClaimTypes.Name, "Bob Smith"),
                             new Claim(JwtClaimTypes.GivenName, "Bob"),
                             new Claim(JwtClaimTypes.FamilyName, "Smith"),
+                            new Claim(JwtClaimTypes.PreferredUserName, "bob"),
                             new Claim(JwtClaimTypes.WebSite, "http://bob.com"),
+                            new Claim(JwtClaimTypes.Email, "bob.smith@mail.com"),
                             new Claim("location", "somewhere")
                         });
                 if (!result.Succeeded)

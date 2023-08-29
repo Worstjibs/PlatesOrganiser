@@ -5,4 +5,5 @@ namespace PlatesOrganiser.Domain.Repositories;
 public interface IPlateUserRepository
 {
     Task<PlateUser?> GetById(Guid id);
+    void AddUser(PlateUser user);
 }

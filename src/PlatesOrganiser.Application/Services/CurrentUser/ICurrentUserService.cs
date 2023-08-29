@@ -4,5 +4,6 @@ namespace PlatesOrganiser.Application.Services.CurrentUser;
 
 public interface ICurrentUserService
 {
-    Task<PlateUser?> GetCurrentUser();
+    Task<PlateUser?> GetCurrentUserAsync();
+    PlateUser CreateUserFromClaims();
 }

@@ -1,4 +1,5 @@
 ﻿using Duende.IdentityServer.Models;
+using IdentityModel;
 
 namespace PlatesOrganiser.Auth;
 public static class Config
@@ -11,11 +12,25 @@ public static class Config
             new IdentityResources.Email()
         };
 
+    public static IEnumerable<ApiResource> ApiResources =>
+        new ApiResource[]
+        {
+            new ApiResource(
+                "platesapi",
+                "Plates Api",
+                new[] { JwtClaimTypes.PreferredUserName })
+            {
+                Scopes =
+                {
+                    "platesapi.read"
+                }
+            }
+        };
+
     public static IEnumerable<ApiScope> ApiScopes =>
         new ApiScope[]
         {
-            new ApiScope("scope1"),
-            new ApiScope("scope2"),
+            new ApiScope("platesapi.read")
         };
 
     public static IEnumerable<Client> Clients =>
@@ -37,7 +52,6 @@ public static class Config
             new Client
             {
                 ClientId = "interactive",
-                ClientSecrets = { new Secret("49C1A7E1-0C79-4A89-A3D6-A37998FB86B0".Sha256()) },
 
                 AllowedGrantTypes = GrantTypes.Code,
 
@@ -45,8 +59,11 @@ public static class Config
                 FrontChannelLogoutUri = "https://localhost:44300/signout-oidc",
                 PostLogoutRedirectUris = { "https://localhost:44300/signout-callback-oidc" },
 
+                AllowedScopes = { "openid", "profile", "email", "platesapi.read" },
+
+                RequireClientSecret = false,
                 AllowOfflineAccess = true,
-                AllowedScopes = { "openid", "profile", "email" }                
+                AlwaysIncludeUserClaimsInIdToken = true
             }
         };
 }

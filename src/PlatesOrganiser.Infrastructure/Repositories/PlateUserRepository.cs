@@ -16,6 +16,11 @@ internal class PlateUserRepository : IPlateUserRepository
 
     public async Task<PlateUser?> GetById(Guid id)
     {
-        return await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
+        return await _context.Users.Include(x => x.Plates).FirstOrDefaultAsync(x => x.Id == id);
+    }
+
+    public void AddUser(PlateUser user)
+    {
+        _context.Users.Add(user);
     }
 }

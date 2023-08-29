@@ -16,7 +16,7 @@ public class UsersController : BaseApiController
     [HttpGet("me")]
     public async Task<ActionResult<PlateUser?>> GetCurrentUser()
     {
-        var result = await _currentUserService.GetCurrentUser();
+        var result = await _currentUserService.GetCurrentUserAsync();
 
         return Ok(result);
     }

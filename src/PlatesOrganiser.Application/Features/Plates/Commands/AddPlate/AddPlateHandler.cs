@@ -1,8 +1,10 @@
 ﻿using MediatR;
 using PlatesOrganiser.API.RecordQuerying.Services;
+using PlatesOrganiser.Application.Services.CurrentUser;
 using PlatesOrganiser.Domain.Entities;
 using PlatesOrganiser.Domain.Repositories;
 using PlatesOrganiser.Domain.Shared;
+using System.Runtime.InteropServices;
 
 namespace PlatesOrganiser.Application.Features.Plates.Commands.AddPlate;
 
@@ -11,34 +13,63 @@ internal class AddPlateHandler : IRequestHandler<AddPlateCommand, Result<PlateDt
     private readonly IRecordQueryingService _queryingService;
     private readonly ILabelRepository _labelRepository;
     private readonly IPlateRepository _plateRepository;
+    private readonly IPlateUserRepository _userRepository;
+    private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
 
     public AddPlateHandler(
         IRecordQueryingService queryingService,
         ILabelRepository labelRepository,
         IPlateRepository plateRepository,
+        IPlateUserRepository userRepository,
+        ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork
     )
     {
         _queryingService = queryingService;
         _labelRepository = labelRepository;
         _plateRepository = plateRepository;
+        _userRepository = userRepository;
+        _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
     }
 
     public async Task<Result<PlateDto>> Handle(AddPlateCommand request, CancellationToken cancellationToken)
     {
         var plate = await _plateRepository.GetPlateByMasterReleaseId(request.MasterReleaseId);
-        if (plate is not null)
-            return Result.Failure<PlateDto>(Error.Bad);
+        if (plate is null)
+            plate = await QueryForMasterRelease(request.MasterReleaseId, cancellationToken);
 
-        var masterRelease = await _queryingService.GetMasterReleaseByIdAsync(request.MasterReleaseId);
+        if (plate is null)
+            return Result.Failure<PlateDto>(Error.NotFound, $"Plate with master Id {request.MasterReleaseId} not found.");
+
+        var user = await _currentUserService.GetCurrentUserAsync();
+        if (user is null)
+        {
+            user = _currentUserService.CreateUserFromClaims();
+            _userRepository.AddUser(user);
+        }
+        else if (user.Plates.Any(x => x.DiscogsMasterReleaseId == request.MasterReleaseId))
+        {
+            return Result.Failure<PlateDto>(Error.Bad, $"User has already added plate {plate.Name} to their collection");
+        }
+
+        user.Plates.Add(plate);
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Create(MapToDto(plate));
+    }
+
+    private async Task<Plate?> QueryForMasterRelease(int masterReleaseId, CancellationToken cancellationToken)
+    {
+        var masterRelease = await _queryingService.GetMasterReleaseByIdAsync(masterReleaseId);
         if (masterRelease is null)
-            return Result.Failure<PlateDto>(Error.NotFound);
+            return null;
 
         var label = await GetOrCreateLabel(masterRelease.PrimaryLabel!);
 
-        plate = new Plate
+        var plate = new Plate
         {
             Name = masterRelease.Title,
             DiscogsMasterReleaseId = masterRelease.ReleaseId,
@@ -48,9 +79,7 @@ internal class AddPlateHandler : IRequestHandler<AddPlateCommand, Result<PlateDt
 
         _plateRepository.AddPlate(plate);
 
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-        return Result.Create(MapToDto(plate));
+        return plate;
     }
 
     private PlateDto MapToDto(Plate plate)

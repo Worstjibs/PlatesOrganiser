@@ -1,8 +1,7 @@
-﻿using PlatesOrganiser.API.Seed;
+﻿using IdentityModel;
 using PlatesOrganiser.Application.Services.CurrentUser;
 using PlatesOrganiser.Domain.Entities;
 using PlatesOrganiser.Domain.Repositories;
-using System.Security.Claims;
 
 namespace PlatesOrganiser.API.Services.CurrentUser;
 
@@ -17,10 +16,22 @@ public class CurrentUserService : ICurrentUserService
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<PlateUser?> GetCurrentUser()
+    public async Task<PlateUser?> GetCurrentUserAsync()
     {
-        var dbUser = await _plateUserRepository.GetById(Seeder.DummyUserGuid);
+        var userId = _httpContextAccessor.HttpContext!.User.Claims.First(x => x.Type == JwtClaimTypes.Subject);
+
+        var dbUser = await _plateUserRepository.GetById(Guid.Parse(userId.Value));
 
         return dbUser;
+    }
+
+    public PlateUser CreateUserFromClaims()
+    {
+        var userClaims = _httpContextAccessor.HttpContext!.User.Claims;
+
+        var userId = userClaims.First(x => x.Type == JwtClaimTypes.Subject);
+        var userName = userClaims.First(x => x.Type == JwtClaimTypes.PreferredUserName);
+
+        return new PlateUser { Id = Guid.Parse(userId.Value), UserName = userName.Value };
     }
 }

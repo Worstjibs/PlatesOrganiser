@@ -2,16 +2,13 @@ using IdentityModel;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using PlatesOrganiser.API.Seed;
 using PlatesOrganiser.API.Services.CurrentUser;
 using PlatesOrganiser.Application;
 using PlatesOrganiser.Application.Services.CurrentUser;
 using PlatesOrganiser.Infrastructure;
 using PlatesOrganiser.Infrastructure.Context;
-using PlatesOrganiser.Infrastructure.Services;
-using System.Text;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,6 +30,8 @@ builder.Services
             .AddApplicationServices()
             .AddInfrastructureServices(builder.Configuration);
 
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
 builder.Services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -52,7 +51,7 @@ builder.Services
                         ValidIssuer = "https://localhost:5101",
 
                         NameClaimType = JwtClaimTypes.GivenName,
-                        RoleClaimType = JwtClaimTypes.Role
+                        RoleClaimType = JwtClaimTypes.Role,
                     };
                 });
 
