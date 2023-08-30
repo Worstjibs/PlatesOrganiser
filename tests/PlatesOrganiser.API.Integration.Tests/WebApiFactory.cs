@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using ParkSquare.Discogs;
+using PlatesOrganiser.API.Integration.Tests.Auth;
 using PlatesOrganiser.Infrastructure.Context;
 using PlatesOrganiser.Infrastructure.Services;
 using Testcontainers.PostgreSql;
@@ -30,23 +33,43 @@ public class WebApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLifetime
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureTestServices(config =>
+        builder.ConfigureTestServices(services =>
         {
-            config.RemoveAll<PlatesContext>();
-            config.RemoveAll<DbContextOptions<PlatesContext>>();
+            ReplaceDatabase(services);
+            ReconfigureDiscogs(services);
 
-            config.RemoveAll<IClientConfig>();
-            config.AddSingleton<IClientConfig>(_ => new ClientConfig
+            services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
             {
-                AuthToken = string.Empty,
-                BaseUrl = _mockServer.GetPublicUrl()
+                var config = new OpenIdConnectConfiguration()
+                {
+                    Issuer = MockJwtTokens.Issuer
+                };
+
+                config.SigningKeys.Add(MockJwtTokens.SecurityKey);
+                options.Configuration = config;
             });
-
-            config.RemoveAll<IDiscogsClient>();
-            config.AddHttpClient<IDiscogsClient, DiscogsClient>(_ => _mockServer.CreateClient());
-
-            config.AddDbContext<PlatesContext>(config => config.UseNpgsql(_dbContainer.GetConnectionString()));
         });
+    }
+
+    private void ReplaceDatabase(IServiceCollection services)
+    {
+        services.RemoveAll<PlatesContext>();
+        services.RemoveAll<DbContextOptions<PlatesContext>>();
+
+        services.AddDbContext<PlatesContext>(config => config.UseNpgsql(_dbContainer.GetConnectionString()));
+    }
+
+    private void ReconfigureDiscogs(IServiceCollection services)
+    {
+        services.RemoveAll<IClientConfig>();
+        services.AddSingleton<IClientConfig>(_ => new ClientConfig
+        {
+            AuthToken = string.Empty,
+            BaseUrl = _mockServer.GetPublicUrl()
+        });
+
+        services.RemoveAll<IDiscogsClient>();
+        services.AddHttpClient<IDiscogsClient, DiscogsClient>(_ => _mockServer.CreateClient());
     }
 
     public HttpClient HttpClient { get; private set; } = default!;

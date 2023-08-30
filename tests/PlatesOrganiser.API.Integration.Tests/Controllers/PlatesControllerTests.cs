@@ -1,12 +1,16 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.DependencyInjection;
 using ParkSquare.Discogs.Dto;
+using PlatesOrganiser.API.Integration.Tests.Auth;
 using PlatesOrganiser.Application.Features.Plates;
 using PlatesOrganiser.Application.Features.Plates.Commands.AddPlate;
 using PlatesOrganiser.Domain.Entities;
 using PlatesOrganiser.Domain.Repositories;
 using PlatesOrganiser.Fakes;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Security.Claims;
 using WireMock.Client.Extensions;
 using Discogs = ParkSquare.Discogs.Dto;
 
@@ -26,6 +30,8 @@ public class PlatesControllerTests : IntegrationTestBase
 
         var masterRelease = await SetupMasterReleaseRequest(command.MasterReleaseId);
         await SetupMasterReleaseVersionsRequest(10, command.MasterReleaseId);
+
+        _client.ActAsUser(Guid.NewGuid());
 
         // Act
         var response = await _client.PostAsJsonAsync("api/plates", command);
