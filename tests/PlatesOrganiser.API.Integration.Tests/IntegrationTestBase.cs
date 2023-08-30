@@ -21,6 +21,8 @@ public class IntegrationTestBase : IAsyncLifetime
     public async Task DisposeAsync()
     {
         await _wireMock.ResetMappingsAsync();
+
+        await _factory.ResetDbAsync();
     }
 
     public Task InitializeAsync() => Task.CompletedTask;

@@ -8,9 +8,7 @@ using PlatesOrganiser.Domain.Entities;
 using PlatesOrganiser.Domain.Repositories;
 using PlatesOrganiser.Fakes;
 using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Security.Claims;
 using WireMock.Client.Extensions;
 using Discogs = ParkSquare.Discogs.Dto;
 
@@ -48,6 +46,29 @@ public class PlatesControllerTests : IntegrationTestBase
         var dbEntity = await GetPlateById(item!.Id);
 
         dbEntity.Should().BeEquivalentTo(item);
+    }
+
+    [Fact]
+    public async Task Create_GivenNonExistantUser_CreatesUser()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var command = new AddPlateCommand(_random.Next(10000));
+
+        await SetupMasterReleaseRequest(command.MasterReleaseId);
+        await SetupMasterReleaseVersionsRequest(10, command.MasterReleaseId);
+
+        _client.ActAsUser(userId);
+
+        (await GetUserById(userId)).Should().BeNull();
+
+        // Act
+        var response = await _client.PostAsJsonAsync("api/plates", command);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        (await GetUserById(userId)).Should().NotBeNull();
     }
 
     private async Task<MasterRelease> SetupMasterReleaseRequest(int masterReleaseId)
@@ -101,5 +122,14 @@ public class PlatesControllerTests : IntegrationTestBase
         var repository = scope.ServiceProvider.GetRequiredService<IPlateRepository>();
 
         return await repository.GetPlateById(id);
+    }
+
+    private async Task<PlateUser?> GetUserById(Guid id)
+    {
+        var scope = _factory.Services.CreateScope();
+
+        var repository = scope.ServiceProvider.GetRequiredService<IPlateUserRepository>();
+
+        return await repository.GetById(id);
     }
 }

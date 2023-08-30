@@ -6,10 +6,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Npgsql;
 using ParkSquare.Discogs;
 using PlatesOrganiser.API.Integration.Tests.Auth;
 using PlatesOrganiser.Infrastructure.Context;
 using PlatesOrganiser.Infrastructure.Services;
+using Respawn;
+using System.Data.Common;
 using Testcontainers.PostgreSql;
 using WireMock.Client;
 using WireMock.Net.Testcontainers;
@@ -20,6 +23,9 @@ public class WebApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLifetime
 {
     private readonly PostgreSqlContainer _dbContainer;
     private readonly WireMockContainer _mockServer;
+
+    private Respawner _respawner = default!;
+    private DbConnection _dbConnection = default!;
 
     public WebApiFactory()
     {
@@ -81,10 +87,22 @@ public class WebApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLifetime
 
         await _mockServer.StartAsync();
 
-        WireMockApi = _mockServer.CreateWireMockAdminClient();
-
         HttpClient = CreateClient();
+
+        _dbConnection = new NpgsqlConnection(_dbContainer.GetConnectionString());
+        await _dbConnection.OpenAsync();
+
+        _respawner = await Respawner.CreateAsync(_dbConnection, new RespawnerOptions
+        {
+            DbAdapter = DbAdapter.Postgres,
+            SchemasToInclude = new[] { "public" },
+            WithReseed = true
+        });
+
+        WireMockApi = _mockServer.CreateWireMockAdminClient();
     }
+
+    public async Task ResetDbAsync() => await _respawner.ResetAsync(_dbConnection);
 
     async Task IAsyncLifetime.DisposeAsync()
     {
