@@ -2,6 +2,7 @@
 using PlatesOrganiser.API.RecordQuerying.Services;
 using PlatesOrganiser.Application.Services.CurrentUser;
 using PlatesOrganiser.Domain.Entities;
+using PlatesOrganiser.Domain.Enum;
 using PlatesOrganiser.Domain.Repositories;
 using PlatesOrganiser.Domain.Shared;
 using System.Runtime.InteropServices;
@@ -36,7 +37,7 @@ internal class AddPlateHandler : IRequestHandler<AddPlateCommand, Result<PlateDt
 
     public async Task<Result<PlateDto>> Handle(AddPlateCommand request, CancellationToken cancellationToken)
     {
-        var plate = await _plateRepository.GetPlateByMasterReleaseId(request.MasterReleaseId);
+        var plate = await _plateRepository.GetPlateByMasterReleaseIdAsync(request.MasterReleaseId);
         if (plate is null)
             plate = await QueryForMasterRelease(request.MasterReleaseId, cancellationToken);
 
@@ -49,12 +50,12 @@ internal class AddPlateHandler : IRequestHandler<AddPlateCommand, Result<PlateDt
             user = _currentUserService.CreateUserFromClaims();
             _userRepository.AddUser(user);
         }
-        else if (user.Plates.Any(x => x.DiscogsMasterReleaseId == request.MasterReleaseId))
-        {
-            return Result.Failure<PlateDto>(Error.Bad, $"User has already added plate {plate.Name} to their collection");
-        }
 
-        user.Plates.Add(plate);
+        if (!user.Collections.Any())
+            user.Collections.Add(new PlateCollection { Name = "Default", User = user });
+
+        var defaultCollection = user.Collections.First(x => x.Type == CollectionType.Default);
+        defaultCollection.Plates.Add(plate);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -99,7 +100,7 @@ internal class AddPlateHandler : IRequestHandler<AddPlateCommand, Result<PlateDt
 
     private async Task<Label> GetOrCreateLabel(string labelName)
     {
-        var label = await _labelRepository.GetLabelByName(labelName);
+        var label = await _labelRepository.GetLabelByNameAsync(labelName);
         if (label is not null)
             return label;
 

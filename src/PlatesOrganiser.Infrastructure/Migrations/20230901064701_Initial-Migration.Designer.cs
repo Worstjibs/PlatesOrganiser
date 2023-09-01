@@ -12,7 +12,7 @@ using PlatesOrganiser.Infrastructure.Context;
 namespace PlatesOrganiser.Infrastructure.Migrations
 {
     [DbContext(typeof(PlatesContext))]
-    [Migration("20230826161153_Initial-Migration")]
+    [Migration("20230901064701_Initial-Migration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -25,19 +25,19 @@ namespace PlatesOrganiser.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("PlatePlateUser", b =>
+            modelBuilder.Entity("PlatePlateCollection", b =>
                 {
+                    b.Property<Guid>("PlateCollectionId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("PlatesId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("UsersId")
-                        .HasColumnType("uuid");
+                    b.HasKey("PlateCollectionId", "PlatesId");
 
-                    b.HasKey("PlatesId", "UsersId");
+                    b.HasIndex("PlatesId");
 
-                    b.HasIndex("UsersId");
-
-                    b.ToTable("PlatePlateUser");
+                    b.ToTable("PlatePlateCollection");
                 });
 
             modelBuilder.Entity("PlatesOrganiser.Domain.Entities.Label", b =>
@@ -78,11 +78,40 @@ namespace PlatesOrganiser.Infrastructure.Migrations
                     b.ToTable("Plates");
                 });
 
+            modelBuilder.Entity("PlatesOrganiser.Domain.Entities.PlateCollection", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Collections");
+                });
+
             modelBuilder.Entity("PlatesOrganiser.Domain.Entities.PlateUser", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserName")
                         .IsRequired()
@@ -93,17 +122,17 @@ namespace PlatesOrganiser.Infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("PlatePlateUser", b =>
+            modelBuilder.Entity("PlatePlateCollection", b =>
                 {
-                    b.HasOne("PlatesOrganiser.Domain.Entities.Plate", null)
+                    b.HasOne("PlatesOrganiser.Domain.Entities.PlateCollection", null)
                         .WithMany()
-                        .HasForeignKey("PlatesId")
+                        .HasForeignKey("PlateCollectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PlatesOrganiser.Domain.Entities.PlateUser", null)
+                    b.HasOne("PlatesOrganiser.Domain.Entities.Plate", null)
                         .WithMany()
-                        .HasForeignKey("UsersId")
+                        .HasForeignKey("PlatesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -111,12 +140,33 @@ namespace PlatesOrganiser.Infrastructure.Migrations
             modelBuilder.Entity("PlatesOrganiser.Domain.Entities.Plate", b =>
                 {
                     b.HasOne("PlatesOrganiser.Domain.Entities.Label", "PrimaryLabel")
-                        .WithMany()
+                        .WithMany("Plates")
                         .HasForeignKey("PrimaryLabelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("PrimaryLabel");
+                });
+
+            modelBuilder.Entity("PlatesOrganiser.Domain.Entities.PlateCollection", b =>
+                {
+                    b.HasOne("PlatesOrganiser.Domain.Entities.PlateUser", "User")
+                        .WithMany("Collections")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("PlatesOrganiser.Domain.Entities.Label", b =>
+                {
+                    b.Navigation("Plates");
+                });
+
+            modelBuilder.Entity("PlatesOrganiser.Domain.Entities.PlateUser", b =>
+                {
+                    b.Navigation("Collections");
                 });
 #pragma warning restore 612, 618
         }

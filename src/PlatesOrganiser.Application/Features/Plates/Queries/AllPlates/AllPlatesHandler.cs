@@ -15,7 +15,7 @@ public class AllPlatesHandler : IRequestHandler<AllPlatesQuery, Result<IEnumerab
 
     public async Task<Result<IEnumerable<PlateDto>>> Handle(AllPlatesQuery request, CancellationToken cancellationToken)
     {
-        var plates = await _plateRepository.GetAllPlates();
+        var plates = await _plateRepository.GetAllPlatesAsync();
 
         var dtos = plates.Select(x =>
                             new PlateDto

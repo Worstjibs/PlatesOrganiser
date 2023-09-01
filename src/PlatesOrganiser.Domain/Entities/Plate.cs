@@ -8,6 +8,4 @@ public class Plate : IEntity
 
     public Guid PrimaryLabelId { get; set; }
     public required Label PrimaryLabel { get; set; }
-
-    public ICollection<PlateUser> Users { get; set; } = new List<PlateUser>();
 }

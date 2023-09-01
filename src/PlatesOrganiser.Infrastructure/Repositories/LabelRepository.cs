@@ -19,12 +19,12 @@ internal class LabelRepository : ILabelRepository
         _context.Labels.Add(label);
     }
 
-    public async Task<Label?> GetLabelByName(string name)
+    public async Task<Label?> GetLabelByNameAsync(string name)
     {
         return await _context.Labels.FirstOrDefaultAsync(x => x.Name == name);
     }
 
-    public async Task<IEnumerable<Label>> GetLabelsByName(string[] names)
+    public async Task<IEnumerable<Label>> GetLabelsByNameAsync(string[] names)
     {
         return await _context.Labels.Join(names, l => l.Name, n => n, (l, n) => l).ToListAsync();
     }

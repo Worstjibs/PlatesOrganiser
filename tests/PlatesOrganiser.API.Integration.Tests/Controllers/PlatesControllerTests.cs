@@ -5,6 +5,7 @@ using PlatesOrganiser.API.Integration.Tests.Auth;
 using PlatesOrganiser.Application.Features.Plates;
 using PlatesOrganiser.Application.Features.Plates.Commands.AddPlate;
 using PlatesOrganiser.Domain.Entities;
+using PlatesOrganiser.Domain.Enum;
 using PlatesOrganiser.Domain.Repositories;
 using PlatesOrganiser.Fakes;
 using System.Net;
@@ -71,6 +72,36 @@ public class PlatesControllerTests : IntegrationTestBase
         (await GetUserById(userId)).Should().NotBeNull();
     }
 
+    [Fact]
+    public async Task Create_AddsToTheUsersCollection()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var command = new AddPlateCommand(_random.Next(10000));
+
+        await SetupMasterReleaseRequest(command.MasterReleaseId);
+        await SetupMasterReleaseVersionsRequest(10, command.MasterReleaseId);
+
+        _client.ActAsUser(userId);
+
+        // Act
+        var response = await _client.PostAsJsonAsync("api/plates", command);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var item = await response.Content.ReadFromJsonAsync<PlateDto>();
+
+        var dbPlate = await GetPlateById(item!.Id);
+
+        var dbUser = await GetUserById(userId);
+        var defaultCollection = dbUser!.Collections.First(x => x.Type == CollectionType.Default);
+
+        var collectionPlate = defaultCollection.Plates.First(x => x.Id == item!.Id);
+
+        collectionPlate.Should().BeEquivalentTo(dbPlate, config => config.Excluding(x => x.PrimaryLabel));
+    }
+
     private async Task<MasterRelease> SetupMasterReleaseRequest(int masterReleaseId)
     {
         var builder = _wireMock.GetMappingBuilder();
@@ -121,7 +152,7 @@ public class PlatesControllerTests : IntegrationTestBase
 
         var repository = scope.ServiceProvider.GetRequiredService<IPlateRepository>();
 
-        return await repository.GetPlateById(id);
+        return await repository.GetPlateByIdAsync(id);
     }
 
     private async Task<PlateUser?> GetUserById(Guid id)
@@ -130,6 +161,6 @@ public class PlatesControllerTests : IntegrationTestBase
 
         var repository = scope.ServiceProvider.GetRequiredService<IPlateUserRepository>();
 
-        return await repository.GetById(id);
+        return await repository.GetUserByIdAsync(id);
     }
 }

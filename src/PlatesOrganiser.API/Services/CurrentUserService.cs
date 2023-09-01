@@ -20,7 +20,7 @@ public class CurrentUserService : ICurrentUserService
     {
         var userId = _httpContextAccessor.HttpContext!.User.Claims.First(x => x.Type == JwtClaimTypes.Subject);
 
-        var dbUser = await _plateUserRepository.GetById(Guid.Parse(userId.Value));
+        var dbUser = await _plateUserRepository.GetUserByIdAsync(Guid.Parse(userId.Value));
 
         return dbUser;
     }

@@ -4,8 +4,8 @@ namespace PlatesOrganiser.Domain.Repositories;
 
 public interface IPlateRepository
 {
-    Task<Plate?> GetPlateById(Guid id);
-    Task<Plate?> GetPlateByMasterReleaseId(int id);
-    Task<IEnumerable<Plate>> GetAllPlates();
+    Task<Plate?> GetPlateByIdAsync(Guid id);
+    Task<Plate?> GetPlateByMasterReleaseIdAsync(int id);
+    Task<IEnumerable<Plate>> GetAllPlatesAsync();
     void AddPlate(Plate plate);
 }

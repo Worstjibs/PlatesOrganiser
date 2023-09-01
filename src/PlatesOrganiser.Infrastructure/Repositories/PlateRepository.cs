@@ -14,21 +14,21 @@ public class PlateRepository : IPlateRepository
         _context = context;
     }
 
-    public async Task<Plate?> GetPlateById(Guid id)
+    public async Task<Plate?> GetPlateByIdAsync(Guid id)
     {
         return await _context.Plates
                                 .Include(x => x.PrimaryLabel)
                                 .FirstOrDefaultAsync(x => x.Id == id);
     }
 
-    public async Task<Plate?> GetPlateByMasterReleaseId(int id)
+    public async Task<Plate?> GetPlateByMasterReleaseIdAsync(int id)
     {
         return await _context.Plates
                                 .Include(x => x.PrimaryLabel)
                                 .FirstOrDefaultAsync(x => x.DiscogsMasterReleaseId == id);
     }
 
-    public async Task<IEnumerable<Plate>> GetAllPlates()
+    public async Task<IEnumerable<Plate>> GetAllPlatesAsync()
     {
         return await _context.Plates
                                 .Include(x => x.PrimaryLabel)

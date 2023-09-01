@@ -28,6 +28,8 @@ namespace PlatesOrganiser.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     UserName = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
@@ -56,33 +58,58 @@ namespace PlatesOrganiser.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PlatePlateUser",
+                name: "Collections",
                 columns: table => new
                 {
-                    PlatesId = table.Column<Guid>(type: "uuid", nullable: false),
-                    UsersId = table.Column<Guid>(type: "uuid", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Type = table.Column<int>(type: "integer", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PlatePlateUser", x => new { x.PlatesId, x.UsersId });
+                    table.PrimaryKey("PK_Collections", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PlatePlateUser_Plates_PlatesId",
-                        column: x => x.PlatesId,
-                        principalTable: "Plates",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PlatePlateUser_Users_UsersId",
-                        column: x => x.UsersId,
+                        name: "FK_Collections_Users_UserId",
+                        column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "PlatePlateCollection",
+                columns: table => new
+                {
+                    PlateCollectionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PlatesId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlatePlateCollection", x => new { x.PlateCollectionId, x.PlatesId });
+                    table.ForeignKey(
+                        name: "FK_PlatePlateCollection_Collections_PlateCollectionId",
+                        column: x => x.PlateCollectionId,
+                        principalTable: "Collections",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PlatePlateCollection_Plates_PlatesId",
+                        column: x => x.PlatesId,
+                        principalTable: "Plates",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
-                name: "IX_PlatePlateUser_UsersId",
-                table: "PlatePlateUser",
-                column: "UsersId");
+                name: "IX_Collections_UserId",
+                table: "Collections",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlatePlateCollection_PlatesId",
+                table: "PlatePlateCollection",
+                column: "PlatesId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Plates_PrimaryLabelId",
@@ -94,7 +121,10 @@ namespace PlatesOrganiser.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "PlatePlateUser");
+                name: "PlatePlateCollection");
+
+            migrationBuilder.DropTable(
+                name: "Collections");
 
             migrationBuilder.DropTable(
                 name: "Plates");
