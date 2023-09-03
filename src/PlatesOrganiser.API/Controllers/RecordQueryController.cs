@@ -14,9 +14,9 @@ public class RecordQueryController : BaseApiController
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<RecordQueryResponse>>> GetAllForTitle([FromQuery] GetAllQuery query)
+    public async Task<ActionResult<IEnumerable<RecordQueryResponse>>> GetAllForTitle([FromQuery] GetAllQuery query, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(query);
+        var result = await _mediator.Send(query, cancellationToken);
 
         return Ok(result);
     }

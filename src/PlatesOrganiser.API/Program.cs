@@ -23,7 +23,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
-    options.SuppressModelStateInvalidFilter = false;
+    options.SuppressModelStateInvalidFilter = true;
 });
 
 builder.Services
@@ -33,27 +33,31 @@ builder.Services
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 builder.Services
-            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
+            .AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.Authority = "http://platesorganiser.auth";
+                options.RequireHttpsMetadata = false;
+
+                options.TokenValidationParameters = new()
                 {
-                    options.Authority = "http://platesorganiser.auth";
-                    options.RequireHttpsMetadata = false;
+                    ValidateIssuer = true,
+                    ValidateIssuerSigningKey = false,
+                    ValidateAudience = false,
+                    ValidateActor = false,
+                    ValidateLifetime = false,
+                    ValidateTokenReplay = false,
 
-                    options.TokenValidationParameters = new()
-                    {
-                        ValidateIssuer = true,
-                        ValidateIssuerSigningKey = false,
-                        ValidateAudience = false,
-                        ValidateActor = false,
-                        ValidateLifetime = false,
-                        ValidateTokenReplay = false,
+                    ValidIssuer = "https://localhost:5101",
 
-                        ValidIssuer = "https://localhost:5101",
-
-                        NameClaimType = JwtClaimTypes.GivenName,
-                        RoleClaimType = JwtClaimTypes.Role,
-                    };
-                });
+                    NameClaimType = JwtClaimTypes.GivenName,
+                    RoleClaimType = JwtClaimTypes.Role,
+                };
+            });
 
 builder.Services.AddHttpContextAccessor();
 

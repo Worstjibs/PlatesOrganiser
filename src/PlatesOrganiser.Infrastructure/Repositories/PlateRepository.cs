@@ -5,7 +5,7 @@ using PlatesOrganiser.Infrastructure.Context;
 
 namespace PlatesOrganiser.Infrastructure.Repositories;
 
-public class PlateRepository : IPlateRepository
+internal class PlateRepository : IPlateRepository
 {
     private readonly PlatesContext _context;
 

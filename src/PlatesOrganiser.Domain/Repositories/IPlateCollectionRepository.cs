@@ -4,6 +4,6 @@ namespace PlatesOrganiser.Domain.Repositories;
 
 public interface IPlateCollectionRepository
 {
-    Task<PlateCollection> GetCollectionByIdAsync(int id);
-    void AddCollection(PlateCollection collection);
+    Task<PlateCollection?> GetCollectionByIdAsync(Guid id, CancellationToken cancellationToken);
+    void AddCollection(PlateCollection collection, CancellationToken cancellationToken);
 }

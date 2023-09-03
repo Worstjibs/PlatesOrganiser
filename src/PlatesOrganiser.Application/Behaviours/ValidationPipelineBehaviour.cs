@@ -38,6 +38,9 @@ internal class ValidationPipelineBehaviour<TRequest, TResponse> : IPipelineBehav
 
     private TResult CreateResult<TResult>(string[] messages) where TResult : Result
     {
+        if (typeof(TResult) != typeof(Result<>))
+            return (Result.Failure(Error.Bad, messages.First()) as TResult)!;
+
         //var result = typeof(Result<>)
         //                    .GetGenericTypeDefinition()
         //                    .MakeGenericType(typeof(TResult).GenericTypeArguments[0])

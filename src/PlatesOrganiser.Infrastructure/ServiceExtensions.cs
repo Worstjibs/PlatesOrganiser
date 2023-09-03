@@ -33,6 +33,7 @@ public static class ServiceExtensions
         services.AddScoped<IPlateUserRepository, PlateUserRepository>();
         services.AddScoped<IPlateRepository, PlateRepository>();
         services.AddScoped<ILabelRepository, LabelRepository>();
+        services.AddScoped<IPlateCollectionRepository, PlateCollectionRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         services.AddTransient<IRecordQueryingService, RecordQueryingService>();

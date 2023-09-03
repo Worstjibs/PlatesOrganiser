@@ -2,7 +2,7 @@
 
 namespace PlatesOrganiser.Application.Features.Plates.Commands.AddPlate;
 
-public class AddPlateValidator : AbstractValidator<AddPlateCommand>
+internal class AddPlateValidator : AbstractValidator<AddPlateCommand>
 {
     public AddPlateValidator()
     {

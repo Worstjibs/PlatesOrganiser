@@ -4,5 +4,6 @@ public enum Error
 {
     None,
     NotFound,
-    Bad
+    Bad,
+    Unknown
 }

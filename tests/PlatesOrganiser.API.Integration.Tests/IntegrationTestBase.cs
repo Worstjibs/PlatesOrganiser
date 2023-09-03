@@ -1,4 +1,8 @@
-﻿using WireMock.Client;
+﻿using Microsoft.Extensions.DependencyInjection;
+using PlatesOrganiser.API.Integration.Tests.Auth;
+using PlatesOrganiser.Domain.Entities;
+using PlatesOrganiser.Infrastructure.Context;
+using WireMock.Client;
 
 namespace PlatesOrganiser.API.Integration.Tests;
 
@@ -23,7 +27,25 @@ public class IntegrationTestBase : IAsyncLifetime
         await _wireMock.ResetMappingsAsync();
 
         await _factory.ResetDbAsync();
+
+        _client.DefaultRequestHeaders.Authorization = null;
     }
 
     public Task InitializeAsync() => Task.CompletedTask;
+
+    protected async Task<PlateUser> ActAsUser(Guid userId)
+    {
+        var user = new PlateUser { Id = userId, UserName = "TestUser" };
+
+        _client.ActAsUser(userId);
+
+        using var scope = _factory.Services.CreateScope();
+
+        var context = scope.ServiceProvider.GetRequiredService<PlatesContext>();
+        context.Users.Add(user);
+
+        await context.SaveChangesAsync();
+
+        return user;
+    }
 }
