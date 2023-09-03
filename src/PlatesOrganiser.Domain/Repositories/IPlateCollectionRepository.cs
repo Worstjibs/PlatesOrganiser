@@ -6,4 +6,5 @@ public interface IPlateCollectionRepository
 {
     Task<PlateCollection?> GetCollectionByIdAsync(Guid id, CancellationToken cancellationToken);
     void AddCollection(PlateCollection collection, CancellationToken cancellationToken);
+    Task<bool> CollectionExistsAsync(string collectionName, Guid userId);
 }

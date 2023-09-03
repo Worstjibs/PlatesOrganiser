@@ -23,7 +23,10 @@ internal class AddCollectionHandler : IRequestHandler<AddCollectionCommand, Resu
     {
         var user = await _currentUserService.GetCurrentUserAsync();
         if (user is null)
-            return Result.Failure<Result>(Error.Bad, "User not found.");
+            return Result.Failure(Error.Bad, "User not found.");
+
+        if (await _repository.CollectionExistsAsync(request.Name, user.Id))
+            return Result.Failure(Error.Bad, $"Collection with name {request.Name} already exists");
 
         var plateCollection = new PlateCollection { Name = request.Name, User = user };
 

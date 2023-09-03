@@ -15,13 +15,14 @@ internal class PlateCollectionRepository : IPlateCollectionRepository
     }
 
     public async Task<PlateCollection?> GetCollectionByIdAsync(Guid id, CancellationToken cancellationToken)
-        =>
-            await _context.Collections
-                .Include(x => x.Plates)
-                .Include(x => x.User)
-                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+        => await _context.Collections
+                            .Include(x => x.Plates)
+                            .Include(x => x.User)
+                            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
     public void AddCollection(PlateCollection collection, CancellationToken cancellationToken)
-        =>
-            _context.Collections.Add(collection);
+        => _context.Collections.Add(collection);
+
+    public async Task<bool> CollectionExistsAsync(string collectionName, Guid userId)
+        => await _context.Collections.AnyAsync(x => x.Name == collectionName && x.UserId == userId);
 }

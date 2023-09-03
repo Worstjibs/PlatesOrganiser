@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using ParkSquare.Discogs.Dto;
 using PlatesOrganiser.API.Integration.Tests.Auth;
+using PlatesOrganiser.API.Integration.Tests.Extensions;
 using PlatesOrganiser.Application.Features.Plates;
 using PlatesOrganiser.Application.Features.Plates.Commands.AddPlate;
 using PlatesOrganiser.Domain.Entities;
@@ -44,7 +45,7 @@ public class PlatesControllerTests : IntegrationTestBase
         item!.Name.Should().Be(masterRelease.Title);
         item.DiscogsMasterReleaseId.Should().Be(command.MasterReleaseId);
 
-        var dbEntity = await GetPlateById(item!.Id);
+        var dbEntity = await _factory.GetPlateById(item!.Id);
 
         dbEntity.Should().BeEquivalentTo(item);
     }
@@ -61,7 +62,7 @@ public class PlatesControllerTests : IntegrationTestBase
 
         _client.ActAsUser(userId);
 
-        (await GetUserById(userId)).Should().BeNull();
+        (await _factory.GetPlateUserById(userId)).Should().BeNull();
 
         // Act
         var response = await _client.PostAsJsonAsync("api/plates", command);
@@ -69,7 +70,7 @@ public class PlatesControllerTests : IntegrationTestBase
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        (await GetUserById(userId)).Should().NotBeNull();
+        (await _factory.GetPlateUserById(userId)).Should().NotBeNull();
     }
 
     [Fact]
@@ -92,9 +93,9 @@ public class PlatesControllerTests : IntegrationTestBase
 
         var item = await response.Content.ReadFromJsonAsync<PlateDto>();
 
-        var dbPlate = await GetPlateById(item!.Id);
+        var dbPlate = await _factory.GetPlateById(item!.Id);
 
-        var dbUser = await GetUserById(userId);
+        var dbUser = await _factory.GetPlateUserById(userId);
         var defaultCollection = dbUser!.Collections.First(x => x.Type == CollectionType.Default);
 
         var collectionPlate = defaultCollection.Plates.First(x => x.Id == item!.Id);
@@ -144,23 +145,5 @@ public class PlatesControllerTests : IntegrationTestBase
         await builder.BuildAndPostAsync();
 
         return versions;
-    }
-
-    private async Task<Plate?> GetPlateById(Guid id)
-    {
-        var scope = _factory.Services.CreateScope();
-
-        var repository = scope.ServiceProvider.GetRequiredService<IPlateRepository>();
-
-        return await repository.GetPlateByIdAsync(id);
-    }
-
-    private async Task<PlateUser?> GetUserById(Guid id)
-    {
-        var scope = _factory.Services.CreateScope();
-
-        var repository = scope.ServiceProvider.GetRequiredService<IPlateUserRepository>();
-
-        return await repository.GetUserByIdAsync(id);
     }
 }

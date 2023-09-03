@@ -1,7 +1,10 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using PlatesOrganiser.API.Integration.Tests.Extensions;
 using PlatesOrganiser.Application.Features.Collections.AddCollection;
 using PlatesOrganiser.Domain.Entities;
 using PlatesOrganiser.Domain.Repositories;
+using PlatesOrganiser.Infrastructure.Context;
 using System.Net;
 using System.Net.Http.Json;
 
@@ -28,7 +31,7 @@ public class PlateCollectionControllerTests : IntegrationTestBase
         response.StatusCode.Should().Be(HttpStatusCode.Created);
 
         var collectionId = await response.Content.ReadFromJsonAsync<Guid>();
-        var collection = await GetCollectionById(collectionId);
+        var collection = await _factory.GetCollectionById(collectionId);
 
         collection.Should().NotBeNull();
         collection.Should().BeEquivalentTo(command);
@@ -50,7 +53,7 @@ public class PlateCollectionControllerTests : IntegrationTestBase
 
         var collectionId = await response.Content.ReadFromJsonAsync<Guid>();
 
-        var dbUser = await GetUserById(user.Id);
+        var dbUser = await _factory.GetPlateUserById(user.Id);
 
         var userCollection = dbUser!.Collections.FirstOrDefault(x => x.Id == collectionId);
         userCollection.Should().NotBeNull();
@@ -74,21 +77,35 @@ public class PlateCollectionControllerTests : IntegrationTestBase
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    private async Task<PlateCollection?> GetCollectionById(Guid id)
+    [Fact]
+    public async Task Add_GivenDuplicateCollectionName_ReturnsBadRequest()
     {
-        var scope = _factory.Services.CreateScope();
+        // Arrange
+        var user = await ActAsUser(Guid.NewGuid());
+        var collectionName = "Collection 123";
 
-        var repository = scope.ServiceProvider.GetRequiredService<IPlateCollectionRepository>();
+        var collection = new PlateCollection { Name = collectionName, UserId = user.Id };
+        await AddCollection(collection);
 
-        return await repository.GetCollectionByIdAsync(id, CancellationToken.None);
+        var command = new AddCollectionCommand(collectionName);
+
+        // Act
+        var response = await _client.PostAsJsonAsync("api/collections", command);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    private async Task<PlateUser?> GetUserById(Guid id)
+    private async Task AddCollection(PlateCollection collection)
     {
         var scope = _factory.Services.CreateScope();
 
-        var repository = scope.ServiceProvider.GetRequiredService<IPlateUserRepository>();
+        var context = scope.ServiceProvider.GetRequiredService<PlatesContext>();
 
-        return await repository.GetUserByIdAsync(id);
+        context.Collections.Add(collection);
+
+        await context.SaveChangesAsync();
+
+        var dbCollection = await context.Collections.FirstOrDefaultAsync(x => x.Id == collection.Id);
     }
 }

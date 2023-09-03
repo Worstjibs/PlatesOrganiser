@@ -7,7 +7,7 @@ using WireMock.Client;
 namespace PlatesOrganiser.API.Integration.Tests;
 
 [Collection("Shared collection")]
-public class IntegrationTestBase : IAsyncLifetime
+public abstract class IntegrationTestBase : IAsyncLifetime
 {
     protected readonly Random _random = new Random(808);
 

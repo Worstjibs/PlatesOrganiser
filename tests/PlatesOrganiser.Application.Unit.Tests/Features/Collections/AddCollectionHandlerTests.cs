@@ -2,6 +2,7 @@
 using PlatesOrganiser.Application.Services.CurrentUser;
 using PlatesOrganiser.Domain.Entities;
 using PlatesOrganiser.Domain.Repositories;
+using PlatesOrganiser.Domain.Shared;
 
 namespace PlatesOrganiser.Application.Unit.Tests.Features.Collections;
 
@@ -42,5 +43,24 @@ public class AddCollectionHandlerTests
         // Assert
         result.Should().NotBeNull();
         result.NewEntityId.Should().Be(newEntityId);
+    }
+
+    [Fact]
+    public async Task Handle_GivenNonExistentUser_ReturnsBad()
+    {
+        // Arrange
+        Guid newEntityId = Guid.NewGuid();
+        var command = new AddCollectionCommand("Collection 1");
+
+        _repository.AddCollection(Arg.Do<PlateCollection>(x => x.Id = newEntityId), Arg.Any<CancellationToken>());
+
+        _unitOfWork.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(true);
+
+        // Act
+        var result = await _sut.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(Error.Bad);
     }
 }

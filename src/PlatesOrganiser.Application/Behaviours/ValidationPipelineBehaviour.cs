@@ -27,11 +27,8 @@ internal class ValidationPipelineBehaviour<TRequest, TResponse> : IPipelineBehav
                                 .Select(x => x.ErrorMessage)
                                 .ToArray();
 
-        if (failures.Any())
-        {
+        if (failures.Length > 0)
             return CreateResult<TResponse>(failures);
-        }
-
 
         return await next();
     }
