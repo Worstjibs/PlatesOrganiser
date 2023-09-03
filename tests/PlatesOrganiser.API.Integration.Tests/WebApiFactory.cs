@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Npgsql;
 using ParkSquare.Discogs;
@@ -55,6 +56,8 @@ public class WebApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLifetime
                 options.Configuration = config;
             });
         });
+
+        builder.ConfigureLogging(config => config.ClearProviders());
     }
 
     private void ReplaceDatabase(IServiceCollection services)
@@ -84,7 +87,6 @@ public class WebApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLifetime
     public async Task InitializeAsync()
     {
         await _dbContainer.StartAsync();
-
         await _mockServer.StartAsync();
 
         HttpClient = CreateClient();

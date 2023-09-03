@@ -24,5 +24,10 @@ jobs:
       run: dotnet restore PlatesOrganiser.sln
     - name: Build
       run: dotnet build --no-restore PlatesOrganiser.sln
+
     - name: API Integration Tests
       run: dotnet test tests/PlatesOrganiser.API.Integration.Tests/PlatesOrganiser.API.Integration.Tests.csproj --no-build --verbosity normal
+    - name: Application Unit Tests
+      run: dotnet test tests/PlatesOrganiser.Application.Unit.Tests/PlatesOrganiser.Application.Unit.Tests.csproj --no-build --verbosity normal
+    - name: Infrastructure Integration Tests
+      run: dotnet test tests/PlatesOrganiser.Infrastructure.Integration.Tests/PlatesOrganiser.Infrastructure.Integration.Tests.csproj --no-build --verbosity normal
