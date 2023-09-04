@@ -3,7 +3,7 @@ using Discogs = ParkSquare.Discogs.Dto;
 
 namespace PlatesOrganiser.Fakes;
 
-public partial class Fake
+public static partial class Fake
 {
     private static Faker<Discogs.Version> _versionFake =
             new Faker<Discogs.Version>();

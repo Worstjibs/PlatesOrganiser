@@ -33,11 +33,11 @@ public abstract class IntegrationTestBase : IAsyncLifetime
 
     public Task InitializeAsync() => Task.CompletedTask;
 
-    protected async Task<PlateUser> ActAsUser(Guid userId)
+    protected async Task<PlateUser> ActAsUser(Guid? userId = null)
     {
-        var user = new PlateUser { Id = userId, UserName = "TestUser" };
+        var user = new PlateUser { Id = userId ?? Guid.NewGuid(), UserName = "TestUser" };
 
-        _client.ActAsUser(userId);
+        _client.ActAsUser(user.Id);
 
         using var scope = _factory.Services.CreateScope();
 

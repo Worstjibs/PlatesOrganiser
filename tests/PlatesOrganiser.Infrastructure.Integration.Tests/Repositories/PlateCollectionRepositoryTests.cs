@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using PlatesOrganiser.Domain.Entities;
 using PlatesOrganiser.Domain.Repositories;
+using PlatesOrganiser.Fakes;
 using PlatesOrganiser.Infrastructure.Repositories;
 using Xunit;
 
@@ -115,5 +116,18 @@ public class PlateCollectionRepositoryTests : IntegrationTestBase
 
         // Assert
         result.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task GetCollectionsAsync_ReturnsPagedListOfCollections()
+    {
+        // Arrange
+        var user = Fake.PlateUser();
+
+        // Act
+
+
+        // Assert
+
     }
 }

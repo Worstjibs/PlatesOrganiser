@@ -10,7 +10,7 @@ public static class ResultExtensions
         if (result.IsSuccess)
         {
             if (result.NewEntityId is not null && location is not null)
-                return new CreatedResult(location, result.NewEntityId);
+                return new CreatedResult($"{location}/{result.NewEntityId}", result.NewEntityId);
 
             return new NoContentResult();
         }

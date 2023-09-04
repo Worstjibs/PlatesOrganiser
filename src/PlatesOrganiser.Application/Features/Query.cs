@@ -3,6 +3,6 @@ using PlatesOrganiser.Domain.Shared;
 
 namespace PlatesOrganiser.Application.Features;
 
-public abstract class Query<TResponse> : IRequest<Result<TResponse>>
+public interface IQuery<TResponse> : IRequest<Result<TResponse>>
 {
 }

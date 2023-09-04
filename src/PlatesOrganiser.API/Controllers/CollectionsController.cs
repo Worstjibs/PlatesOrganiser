@@ -2,7 +2,9 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using PlatesOrganiser.API.Extensions;
+using PlatesOrganiser.Application.Features.Collections;
 using PlatesOrganiser.Application.Features.Collections.AddCollection;
+using PlatesOrganiser.Application.Features.Collections.GetCollectionById;
 
 namespace PlatesOrganiser.API.Controllers;
 
@@ -13,6 +15,14 @@ public class CollectionsController : BaseApiController
     public CollectionsController(IMediator mediator, IValidator<AddCollectionCommand> validators)
     {
         _mediator = mediator;
+    }
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<CollectionDto?>> Get([FromRoute] GetCollectionByIdQuery query, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(query, cancellationToken);
+
+        return result.ToActionResult();
     }
 
     [HttpPost]

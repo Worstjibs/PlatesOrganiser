@@ -1,6 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Docker.DotNet.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using PlatesOrganiser.Domain.Entities;
 using PlatesOrganiser.Domain.Repositories;
+using PlatesOrganiser.Infrastructure.Context;
 
 namespace PlatesOrganiser.API.Integration.Tests.Extensions;
 
@@ -31,5 +34,19 @@ public static class FactoryExtensions
         var repository = scope.ServiceProvider.GetRequiredService<IPlateCollectionRepository>();
 
         return await repository.GetCollectionByIdAsync(id, CancellationToken.None);
+    }
+
+    public static async Task<PlateCollection> AddCollectionAsync(this WebApiFactory factory, string collectionName, Guid userId)
+    {
+        var scope = factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<PlatesContext>();
+
+        var user = await context.Users.FirstAsync(x => x.Id == userId);
+        var collection = new PlateCollection { Name = collectionName, User = user };
+        user.Collections.Add(collection);
+
+        await context.SaveChangesAsync();
+
+        return collection;
     }
 }

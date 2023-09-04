@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
+using Namotion.Reflection;
 using ParkSquare.Discogs.Dto;
 using PlatesOrganiser.API.Integration.Tests.Auth;
 using PlatesOrganiser.API.Integration.Tests.Extensions;
@@ -23,35 +24,33 @@ public class PlatesControllerTests : IntegrationTestBase
     }
 
     [Fact]
-    public async Task Create_ReturnsSuccessWithPlate()
+    public async Task Create_ReturnsCreatedAndCreatesPlate()
     {
         // Arrange
         var command = new AddPlateCommand(_random.Next(10000));
 
         var masterRelease = await SetupMasterReleaseRequest(command.MasterReleaseId);
-        await SetupMasterReleaseVersionsRequest(10, command.MasterReleaseId);
+        var versions = await SetupMasterReleaseVersionsRequest(10, command.MasterReleaseId);
 
-        _client.ActAsUser(Guid.NewGuid());
+        await ActAsUser();
 
         // Act
         var response = await _client.PostAsJsonAsync("api/plates", command);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.AssertCreated();
 
-        var item = await response.Content.ReadFromJsonAsync<PlateDto>();
+        var plateId = await response.Content.ReadFromJsonAsync<Guid>();
 
-        item.Should().NotBeNull();
-        item!.Name.Should().Be(masterRelease.Title);
-        item.DiscogsMasterReleaseId.Should().Be(command.MasterReleaseId);
+        var dbEntity = await _factory.GetPlateById(plateId);
 
-        var dbEntity = await _factory.GetPlateById(item!.Id);
-
-        dbEntity.Should().BeEquivalentTo(item);
+        dbEntity!.Name.Should().BeEquivalentTo(masterRelease.Title);
+        dbEntity.DiscogsMasterReleaseId.Should().Be(masterRelease.MasterId);
+        dbEntity.PrimaryLabel.Name.Should().Be(versions.First().Label);
     }
 
     [Fact]
-    public async Task Create_GivenNonExistantUser_CreatesUser()
+    public async Task Create_GivenNonExistentUser_CreatesUser()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -68,7 +67,7 @@ public class PlatesControllerTests : IntegrationTestBase
         var response = await _client.PostAsJsonAsync("api/plates", command);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.AssertCreated();
 
         (await _factory.GetPlateUserById(userId)).Should().NotBeNull();
     }
@@ -77,28 +76,27 @@ public class PlatesControllerTests : IntegrationTestBase
     public async Task Create_AddsToTheUsersCollection()
     {
         // Arrange
-        var userId = Guid.NewGuid();
         var command = new AddPlateCommand(_random.Next(10000));
 
         await SetupMasterReleaseRequest(command.MasterReleaseId);
         await SetupMasterReleaseVersionsRequest(10, command.MasterReleaseId);
 
-        _client.ActAsUser(userId);
+        var user = await ActAsUser();
 
         // Act
         var response = await _client.PostAsJsonAsync("api/plates", command);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.AssertCreated();
 
-        var item = await response.Content.ReadFromJsonAsync<PlateDto>();
+        var plateId = await response.Content.ReadFromJsonAsync<Guid>();
 
-        var dbPlate = await _factory.GetPlateById(item!.Id);
+        var dbPlate = await _factory.GetPlateById(plateId);
 
-        var dbUser = await _factory.GetPlateUserById(userId);
+        var dbUser = await _factory.GetPlateUserById(user.Id);
         var defaultCollection = dbUser!.Collections.First(x => x.Type == CollectionType.Default);
 
-        var collectionPlate = defaultCollection.Plates.First(x => x.Id == item!.Id);
+        var collectionPlate = defaultCollection.Plates.First(x => x.Id == plateId);
 
         collectionPlate.Should().BeEquivalentTo(dbPlate, config => config.Excluding(x => x.PrimaryLabel));
     }

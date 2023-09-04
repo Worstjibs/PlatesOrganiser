@@ -3,7 +3,7 @@ using ParkSquare.Discogs.Dto;
 
 namespace PlatesOrganiser.Fakes;
 
-public partial class Fake
+public static partial class Fake
 {
     private static Faker<MasterRelease> _masterReleaseFake =
             new Faker<MasterRelease>()

@@ -30,6 +30,6 @@ public class PlatesController : BaseApiController
     {
         var result = await _mediator.Send(command, cancellationToken);
 
-        return result.ToActionResult();
+        return result.ToActionResult("plates");
     }
 }

@@ -8,7 +8,7 @@ using PlatesOrganiser.Domain.Shared;
 
 namespace PlatesOrganiser.Application.Features.Plates.Commands.AddPlate;
 
-internal class AddPlateHandler : IRequestHandler<AddPlateCommand, Result<PlateDto>>
+internal class AddPlateHandler : ICommandHandler<AddPlateCommand>
 {
     private readonly IRecordQueryingService _queryingService;
     private readonly ILabelRepository _labelRepository;
@@ -34,11 +34,10 @@ internal class AddPlateHandler : IRequestHandler<AddPlateCommand, Result<PlateDt
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Result<PlateDto>> Handle(AddPlateCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(AddPlateCommand request, CancellationToken cancellationToken)
     {
         var plate = await _plateRepository.GetPlateByMasterReleaseIdAsync(request.MasterReleaseId);
-        if (plate is null)
-            plate = await QueryForMasterRelease(request.MasterReleaseId, cancellationToken);
+        plate ??= await QueryForMasterRelease(request.MasterReleaseId);
 
         if (plate is null)
             return Result.Failure<PlateDto>(Error.NotFound, $"Plate with master Id {request.MasterReleaseId} not found.");
@@ -58,10 +57,10 @@ internal class AddPlateHandler : IRequestHandler<AddPlateCommand, Result<PlateDt
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result.Create(MapToDto(plate));
+        return Result.Success(plate.Id);
     }
 
-    private async Task<Plate?> QueryForMasterRelease(int masterReleaseId, CancellationToken cancellationToken)
+    private async Task<Plate?> QueryForMasterRelease(int masterReleaseId)
     {
         var masterRelease = await _queryingService.GetMasterReleaseByIdAsync(masterReleaseId);
         if (masterRelease is null)
@@ -80,21 +79,6 @@ internal class AddPlateHandler : IRequestHandler<AddPlateCommand, Result<PlateDt
         _plateRepository.AddPlate(plate);
 
         return plate;
-    }
-
-    private PlateDto MapToDto(Plate plate)
-    {
-        return new PlateDto
-        {
-            Id = plate.Id,
-            Name = plate.Name,
-            DiscogsMasterReleaseId = plate.DiscogsMasterReleaseId,
-            PrimaryLabel = new PlateLabelDto
-            {
-                Id = plate.PrimaryLabel.Id,
-                Name = plate.PrimaryLabel.Name
-            }
-        };
     }
 
     private async Task<Label> GetOrCreateLabel(string labelName)
