@@ -1,4 +1,4 @@
-﻿namespace PlatesOrganiser.Application.Features.Collections.GetCollectionById;
+﻿namespace PlatesOrganiser.Application.Features.Collections.Queries.GetCollectionById;
 
 public class GetCollectionByIdQuery : IQuery<CollectionDto>
 {

@@ -1,6 +1,6 @@
 ﻿using PlatesOrganiser.API.Integration.Tests.Extensions;
 using PlatesOrganiser.Application.Features.Collections;
-using PlatesOrganiser.Application.Features.Collections.AddCollection;
+using PlatesOrganiser.Application.Features.Collections.Commands.AddCollection;
 using System.Net;
 using System.Net.Http.Json;
 

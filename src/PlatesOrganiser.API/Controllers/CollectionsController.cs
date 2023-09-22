@@ -3,8 +3,8 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using PlatesOrganiser.API.Extensions;
 using PlatesOrganiser.Application.Features.Collections;
-using PlatesOrganiser.Application.Features.Collections.AddCollection;
-using PlatesOrganiser.Application.Features.Collections.GetCollectionById;
+using PlatesOrganiser.Application.Features.Collections.Commands.AddCollection;
+using PlatesOrganiser.Application.Features.Collections.Queries.GetCollectionById;
 
 namespace PlatesOrganiser.API.Controllers;
 

@@ -1,7 +1,7 @@
 ﻿using PlatesOrganiser.Domain.Repositories;
 using PlatesOrganiser.Domain.Shared;
 
-namespace PlatesOrganiser.Application.Features.Collections.GetCollectionById;
+namespace PlatesOrganiser.Application.Features.Collections.Queries.GetCollectionById;
 
 public class GetCollectionByIdHandler : IQueryHandler<GetCollectionByIdQuery, CollectionDto>
 {

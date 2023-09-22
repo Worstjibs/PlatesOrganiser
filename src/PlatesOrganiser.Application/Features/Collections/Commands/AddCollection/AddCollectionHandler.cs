@@ -4,7 +4,7 @@ using PlatesOrganiser.Domain.Entities;
 using PlatesOrganiser.Domain.Repositories;
 using PlatesOrganiser.Domain.Shared;
 
-namespace PlatesOrganiser.Application.Features.Collections.AddCollection;
+namespace PlatesOrganiser.Application.Features.Collections.Commands.AddCollection;
 
 internal class AddCollectionHandler : IRequestHandler<AddCollectionCommand, Result>
 {

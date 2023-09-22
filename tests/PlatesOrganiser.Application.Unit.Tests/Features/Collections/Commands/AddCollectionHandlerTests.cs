@@ -1,10 +1,10 @@
-﻿using PlatesOrganiser.Application.Features.Collections.AddCollection;
+﻿using PlatesOrganiser.Application.Features.Collections.Commands.AddCollection;
 using PlatesOrganiser.Application.Services.CurrentUser;
 using PlatesOrganiser.Domain.Entities;
 using PlatesOrganiser.Domain.Repositories;
 using PlatesOrganiser.Domain.Shared;
 
-namespace PlatesOrganiser.Application.Unit.Tests.Features.Collections;
+namespace PlatesOrganiser.Application.Unit.Tests.Features.Collections.Commands;
 
 public class AddCollectionHandlerTests
 {

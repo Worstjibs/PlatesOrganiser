@@ -17,7 +17,7 @@ internal class ValidationPipelineBehaviour<TRequest, TResponse> : IPipelineBehav
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        var validationTasks = _validators.Select(x => x.ValidateAsync(new ValidationContext<TRequest>(request), cancellationToken));
+        var validationTasks = _validators.Select(x => x.ValidateAsync(request, cancellationToken));
 
         var validationResults = await Task.WhenAll(validationTasks);
 
@@ -28,27 +28,22 @@ internal class ValidationPipelineBehaviour<TRequest, TResponse> : IPipelineBehav
                                 .ToArray();
 
         if (failures.Length > 0)
-            return CreateResult<TResponse>(failures);
+            return CreateResult(failures);
 
         return await next();
     }
 
-    private TResult CreateResult<TResult>(string[] messages) where TResult : Result
+    private TResponse CreateResult(string[] messages)
     {
-        if (typeof(TResult) != typeof(Result<>))
-            return (Result.Failure(Error.Bad, messages.First()) as TResult)!;
-
-        //var result = typeof(Result<>)
-        //                    .GetGenericTypeDefinition()
-        //                    .MakeGenericType(typeof(TResult).GenericTypeArguments[0])
-        //                    .GetMethod("Failure");
+        if (!typeof(TResponse).IsGenericType)
+            return (Result.Failure(Error.Bad, messages.First()) as TResponse)!;
 
         var failureMethod = typeof(Result)
-                                    .GetMethod(nameof(Result.Failure))!
-                                    .MakeGenericMethod(typeof(TResult).GenericTypeArguments[0]);
+                                    .GetMethod(nameof(Result.Failure), 1, [typeof(Error), typeof(string)])!
+                                    .MakeGenericMethod(typeof(TResponse).GenericTypeArguments[0]);
 
-        var result = failureMethod.Invoke(null, new object[] { Error.Bad });
+        var result = failureMethod.Invoke(null, [Error.Bad, messages.First()]);
 
-        return (result as TResult)!;
+        return (result as TResponse)!;
     }
 }

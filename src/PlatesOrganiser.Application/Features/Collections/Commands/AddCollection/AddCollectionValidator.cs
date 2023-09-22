@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace PlatesOrganiser.Application.Features.Collections.AddCollection;
+namespace PlatesOrganiser.Application.Features.Collections.Commands.AddCollection;
 
 internal class AddCollectionValidator : AbstractValidator<AddCollectionCommand>
 {

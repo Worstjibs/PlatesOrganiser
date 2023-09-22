@@ -4,7 +4,7 @@ using PlatesOrganiser.Domain.Shared;
 
 namespace PlatesOrganiser.Application.Features.Plates.Queries.AllPlates;
 
-internal class AllPlatesHandler : IRequestHandler<AllPlatesQuery, Result<IEnumerable<PlateDto>>>
+internal class AllPlatesHandler : IQueryHandler<AllPlatesQuery, IEnumerable<PlateDto>>
 {
     private readonly IPlateRepository _plateRepository;
 
